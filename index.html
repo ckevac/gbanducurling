@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curling League Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .active-tab { border-top: 4px solid #2563eb; color: #2563eb; }
+        .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-50 pb-20 font-sans">
+
+    <header class="bg-blue-800 text-white p-4 shadow-md sticky top-0 z-50">
+        <h1 id="page-title" class="text-xl font-bold text-center italic tracking-wider">🥌 CURLING LEAGUE</h1>
+    </header>
+
+    <main class="max-w-md mx-auto p-4">
+        
+        <div id="loading" class="flex flex-col items-center justify-center mt-20">
+            <div class="loading-spinner"></div>
+            <p class="mt-4 text-gray-500">Sweeping the ice...</p>
+        </div>
+
+        <div id="schedule-view" class="hidden space-y-4">
+            <h2 class="text-lg font-semibold text-gray-700 border-b pb-2">Upcoming Games</h2>
+            <div id="schedule-list" class="space-y-3"></div>
+        </div>
+
+        <div id="standings-view" class="hidden">
+            <h2 class="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">League Standings</h2>
+            <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-100">
+                        <tr id="standings-header"></tr>
+                    </thead>
+                    <tbody id="standings-body" class="divide-y divide-gray-200 text-sm text-gray-600"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around text-xs py-2">
+        <button onclick="switchTab('schedule')" id="nav-schedule" class="flex flex-col items-center px-6 py-1 active-tab">
+            <i class="fa-solid fa-calendar-days text-xl mb-1"></i>
+            <span>Schedule</span>
+        </button>
+        <button onclick="switchTab('standings')" id="nav-standings" class="flex flex-col items-center px-6 py-1 text-gray-500">
+            <i class="fa-solid fa-ranking-star text-xl mb-1"></i>
+            <span>Standings</span>
+        </button>
+    </nav>
+
+    <script>
+        const SCHEDULE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQz2JZi041jr2rlFvlOzMT-q_eD2JwHqgsAWNOtc07pzCH89pxV15O-HmNLz_gXDQ2CXjBFQPgbAcU2/pub?gid=86324966&single=true&output=tsv";
+        const STANDINGS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQz2JZi041jr2rlFvlOzMT-q_eD2JwHqgsAWNOtc07pzCH89pxV15O-HmNLz_gXDQ2CXjBFQPgbAcU2/pub?gid=1168122527&single=true&output=tsv";
+
+        function fetchData(url) {
+            return new Promise((resolve, reject) => {
+                Papa.parse(url, {
+                    download: true,
+                    header: true,
+                    delimiter: "\t",
+                    skipEmptyLines: true,
+                    complete: results => resolve(results.data),
+                    error: err => reject(err)
+                });
+            });
+        }
+
+        async function init() {
+            try {
+                const [schedule, standings] = await Promise.all([
+                    fetchData(SCHEDULE_URL),
+                    fetchData(STANDINGS_URL)
+                ]);
+
+                renderSchedule(schedule);
+                renderStandings(standings);
+                
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('schedule-view').classList.remove('hidden');
+            } catch (error) {
+                console.error("Error loading data:", error);
+                document.getElementById('loading').innerHTML = `<p class="text-red-500">Error loading league data. Please check your sheet permissions.</p>`;
+            }
+        }
+
+        function renderSchedule(data) {
+            const container = document.getElementById('schedule-list');
+            container.innerHTML = data.map(game => `
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">${game.Date || 'TBD'}</span>
+                        <span class="text-xs text-gray-400 font-mono">${game.Time || ''}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1 text-center font-medium text-gray-800">${game.Home || game.Team1 || 'TBD'}</div>
+                        <div class="px-3 text-gray-300 italic text-sm">vs</div>
+                        <div class="flex-1 text-center font-medium text-gray-800">${game.Away || game.Team2 || 'TBD'}</div>
+                    </div>
+                    ${game.Sheet ? `<div class="mt-2 text-center text-[10px] uppercase tracking-widest text-gray-400">Sheet ${game.Sheet}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function renderStandings(data) {
+            if (data.length === 0) return;
+            const headers = Object.keys(data[0]);
+            
+            // Render Header
+            document.getElementById('standings-header').innerHTML = headers.map(h => 
+                `<th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">${h}</th>`
+            ).join('');
+
+            // Render Rows
+            document.getElementById('standings-body').innerHTML = data.map(row => `
+                <tr class="hover:bg-gray-50">
+                    ${headers.map(h => `<td class="px-4 py-3 whitespace-nowrap font-medium ${h === 'Team' ? 'text-gray-900' : ''}">${row[h]}</td>`).join('')}
+                </tr>
+            `).join('');
+        }
+
+        function switchTab(tab) {
+            const schView = document.getElementById('schedule-view');
+            const stdView = document.getElementById('standings-view');
+            const navSch = document.getElementById('nav-schedule');
+            const navStd = document.getElementById('nav-standings');
+
+            if (tab === 'schedule') {
+                schView.classList.remove('hidden');
+                stdView.classList.add('hidden');
+                navSch.classList.add('active-tab');
+                navStd.classList.remove('active-tab');
+            } else {
+                schView.classList.add('hidden');
+                stdView.classList.remove('hidden');
+                navStd.classList.add('active-tab');
+                navSch.classList.remove('active-tab');
+            }
+            window.scrollTo(0, 0);
+        }
+
+        init();
+    </script>
+</body>
+</html>
