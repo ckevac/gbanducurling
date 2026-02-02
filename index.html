@@ -3,149 +3,333 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Curling League Portal</title>
+    <title>The Good, the Bad, and the Ugly Curling League</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        .active-tab { border-top: 4px solid #2563eb; color: #2563eb; }
-        .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        :root {
+            --vintage-tan: #d9c5a0;
+            --bandit-red: #a63a2a;
+            --bandit-navy: #2d3e50;
+            --rope-brown: #735338;
+            --paper-white: #f4eee1;
+        }
+
+        body { background-color: var(--paper-white); color: var(--bandit-navy); }
+        
+        .active-tab { 
+            color: var(--bandit-red); 
+            border-bottom: 3px solid var(--bandit-red); 
+            background: rgba(166, 58, 42, 0.05);
+        }
+
+        .loading-spinner { 
+            border: 4px solid var(--vintage-tan); 
+            border-top: 4px solid var(--bandit-red); 
+            border-radius: 50%; width: 40px; height: 40px; 
+            animation: spin 1s linear infinite; 
+        }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .glass-card { 
+            background: white; 
+            border: 1px solid var(--vintage-tan);
+            box-shadow: 0 4px 6px -1px rgba(115, 83, 56, 0.1);
+        }
+
+        .header-gradient {
+            background: linear-gradient(to bottom, #2d3e50, #1a252f);
+            border-bottom: 4px solid var(--rope-brown);
+        }
+
+        select { 
+            -webkit-appearance: none; -moz-appearance: none; appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23735338'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.5em;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-gray-50 pb-20 font-sans">
+<body class="min-h-screen pb-24 font-sans">
 
-    <header class="bg-blue-800 text-white p-4 shadow-md sticky top-0 z-50">
-        <h1 id="page-title" class="text-xl font-bold text-center italic tracking-wider">🥌 CURLING LEAGUE</h1>
+    <!-- Header -->
+    <header class="header-gradient text-white shadow-xl sticky top-0 z-50">
+        <div class="max-w-md mx-auto px-4 py-4 flex items-center justify-center gap-4">
+            <!-- Logo Container -->
+            <div class="w-20 h-20 rounded-full border-4 border-[#d9c5a0] overflow-hidden bg-white shadow-lg flex-shrink-0">
+                <img id="league-logo" 
+                     src="https://lh3.googleusercontent.com/u/0/d/10gkXR4l-Mifhhz2hevWdFM8TZiqoIe52" 
+                     alt="League Logo" 
+                     class="w-full h-full object-cover"
+                     onerror="handleLogoError(this)">
+            </div>
+            
+            <div class="flex flex-col">
+                <h1 class="text-xs font-black uppercase tracking-tighter leading-tight italic opacity-90">The Good, the Bad, & the Ugly</h1>
+                <h2 class="text-2xl font-black uppercase tracking-widest text-[#d9c5a0] leading-none">Curling</h2>
+                <h2 class="text-xl font-black uppercase tracking-widest text-[#d9c5a0] leading-tight">League</h2>
+            </div>
+        </div>
+        
+        <div class="max-w-md mx-auto flex bg-[#1a252f]">
+            <button onclick="switchTab('schedule')" id="tab-schedule" class="flex-1 py-3 text-xs font-bold uppercase tracking-widest active-tab transition-all">Schedule</button>
+            <button onclick="switchTab('standings')" id="tab-standings" class="flex-1 py-3 text-xs font-bold uppercase tracking-widest text-[#d9c5a0] transition-all">Standings</button>
+        </div>
     </header>
 
     <main class="max-w-md mx-auto p-4">
-        
         <div id="loading" class="flex flex-col items-center justify-center mt-20">
             <div class="loading-spinner"></div>
-            <p class="mt-4 text-gray-500">Sweeping the ice...</p>
+            <p class="mt-4 text-[#735338] font-bold italic uppercase text-xs tracking-widest">Polishing the Stones...</p>
         </div>
 
+        <!-- Schedule View -->
         <div id="schedule-view" class="hidden space-y-4">
-            <h2 class="text-lg font-semibold text-gray-700 border-b pb-2">Upcoming Games</h2>
-            <div id="schedule-list" class="space-y-3"></div>
+            <div class="relative">
+                <label for="date-select" class="block text-[10px] font-black text-[#735338] uppercase mb-1 ml-1 tracking-widest">Select Game Day</label>
+                <select id="date-select" onchange="filterScheduleByDate(this.value)" class="w-full bg-white border-2 border-[#d9c5a0] rounded-lg px-4 py-3 font-black text-[#2d3e50] shadow-md focus:ring-2 focus:ring-[#a63a2a] outline-none uppercase text-sm">
+                </select>
+            </div>
+            
+            <div id="round-banner" class="hidden bg-[#a63a2a] border-2 border-[#735338] rounded-lg p-2 text-center shadow-lg">
+                <span id="round-text" class="text-xs font-black text-white uppercase tracking-widest italic"></span>
+            </div>
+            
+            <div id="schedule-list" class="space-y-4 pt-2"></div>
         </div>
 
-        <div id="standings-view" class="hidden">
-            <h2 class="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">League Standings</h2>
-            <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-100">
-                        <tr id="standings-header"></tr>
-                    </thead>
-                    <tbody id="standings-body" class="divide-y divide-gray-200 text-sm text-gray-600"></tbody>
-                </table>
+        <!-- Standings View -->
+        <div id="standings-view" class="hidden space-y-4">
+            <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar" id="pos-tabs">
+                <button onclick="filterStandings('Skip')" id="btn-Skip" class="pos-tab px-5 py-2 rounded-lg bg-[#2d3e50] text-white text-[10px] font-black uppercase tracking-widest whitespace-nowrap border-b-4 border-[#1a252f]">Skips</button>
+                <button onclick="filterStandings('Vice')" id="btn-Vice" class="pos-tab px-5 py-2 rounded-lg bg-white border-2 border-[#d9c5a0] text-[#735338] text-[10px] font-black uppercase tracking-widest whitespace-nowrap border-b-4 border-[#d9c5a0]">Vices</button>
+                <button onclick="filterStandings('Second')" id="btn-Second" class="pos-tab px-5 py-2 rounded-lg bg-white border-2 border-[#d9c5a0] text-[#735338] text-[10px] font-black uppercase tracking-widest whitespace-nowrap border-b-4 border-[#d9c5a0]">Seconds</button>
+                <button onclick="filterStandings('Lead')" id="btn-Lead" class="pos-tab px-5 py-2 rounded-lg bg-white border-2 border-[#d9c5a0] text-[#735338] text-[10px] font-black uppercase tracking-widest whitespace-nowrap border-b-4 border-[#d9c5a0]">Leads</button>
             </div>
+            <div id="standings-list" class="space-y-3"></div>
         </div>
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around text-xs py-2">
-        <button onclick="switchTab('schedule')" id="nav-schedule" class="flex flex-col items-center px-6 py-1 active-tab">
-            <i class="fa-solid fa-calendar-days text-xl mb-1"></i>
-            <span>Schedule</span>
-        </button>
-        <button onclick="switchTab('standings')" id="nav-standings" class="flex flex-col items-center px-6 py-1 text-gray-500">
-            <i class="fa-solid fa-ranking-star text-xl mb-1"></i>
-            <span>Standings</span>
-        </button>
-    </nav>
+    <div class="max-w-md mx-auto px-6 py-8 text-center text-[#735338] text-[10px] font-bold uppercase tracking-widest">
+        Whitby, Ontario • Est. 2025
+    </div>
 
     <script>
-        const SCHEDULE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQz2JZi041jr2rlFvlOzMT-q_eD2JwHqgsAWNOtc07pzCH89pxV15O-HmNLz_gXDQ2CXjBFQPgbAcU2/pub?gid=86324966&single=true&output=tsv";
-        const STANDINGS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQz2JZi041jr2rlFvlOzMT-q_eD2JwHqgsAWNOtc07pzCH89pxV15O-HmNLz_gXDQ2CXjBFQPgbAcU2/pub?gid=1168122527&single=true&output=tsv";
+        const SCHEDULE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQz2JZi041jr2rlFvlOzMT-q_eD2JwHqgsAWNOtc07pzCH89pxV15O-HmNLz_gXDQ2CXjBFQPgbAcU2/pub?gid=2053038258&single=true&output=csv";
+        const STANDINGS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQz2JZi041jr2rlFvlOzMT-q_eD2JwHqgsAWNOtc07pzCH89pxV15O-HmNLz_gXDQ2CXjBFQPgbAcU2/pub?gid=1570496540&single=true&output=csv";
 
-        function fetchData(url) {
-            return new Promise((resolve, reject) => {
-                Papa.parse(url, {
-                    download: true,
-                    header: true,
-                    delimiter: "\t",
-                    skipEmptyLines: true,
-                    complete: results => resolve(results.data),
-                    error: err => reject(err)
-                });
-            });
+        let allGames = {};
+        let allStandings = { Skip: [], Vice: [], Second: [], Lead: [] };
+
+        function handleLogoError(img) {
+            // If Drive direct link fails due to auth/permissions, fallback to a stylized placeholder
+            img.src = 'https://placehold.co/200x200/2d3e50/d9c5a0?text=GBU+CURLING';
         }
 
-        async function init() {
+        async function loadAppData() {
             try {
-                const [schedule, standings] = await Promise.all([
-                    fetchData(SCHEDULE_URL),
-                    fetchData(STANDINGS_URL)
+                const [schRaw, stdRaw] = await Promise.all([
+                    fetch(SCHEDULE_URL).then(r => r.text()),
+                    fetch(STANDINGS_URL).then(r => r.text())
                 ]);
 
-                renderSchedule(schedule);
-                renderStandings(standings);
-                
+                const schData = Papa.parse(schRaw, { header: false, skipEmptyLines: true }).data;
+                const stdData = Papa.parse(stdRaw, { header: true, skipEmptyLines: true }).data;
+
+                processStandings(stdData);
+                processSchedule(schData);
+
                 document.getElementById('loading').classList.add('hidden');
                 document.getElementById('schedule-view').classList.remove('hidden');
-            } catch (error) {
-                console.error("Error loading data:", error);
-                document.getElementById('loading').innerHTML = `<p class="text-red-500">Error loading league data. Please check your sheet permissions.</p>`;
+                filterStandings('Skip');
+            } catch (e) {
+                console.error(e);
+                document.getElementById('loading').innerHTML = `<div class="text-red-800 text-center p-10 font-black uppercase italic">Out of Bounds: Error Loading Data.</div>`;
             }
         }
 
-        function renderSchedule(data) {
-            const container = document.getElementById('schedule-list');
-            container.innerHTML = data.map(game => `
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">${game.Date || 'TBD'}</span>
-                        <span class="text-xs text-gray-400 font-mono">${game.Time || ''}</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <div class="flex-1 text-center font-medium text-gray-800">${game.Home || game.Team1 || 'TBD'}</div>
-                        <div class="px-3 text-gray-300 italic text-sm">vs</div>
-                        <div class="flex-1 text-center font-medium text-gray-800">${game.Away || game.Team2 || 'TBD'}</div>
-                    </div>
-                    ${game.Sheet ? `<div class="mt-2 text-center text-[10px] uppercase tracking-widest text-gray-400">Sheet ${game.Sheet}</div>` : ''}
-                </div>
-            `).join('');
+        function processStandings(data) {
+            allStandings = { Skip: [], Vice: [], Second: [], Lead: [] };
+            data.forEach(row => {
+                const vals = Object.values(row);
+                const pos = (vals[0] || "").trim();
+                const name = (vals[1] || "").trim();
+                const ends = (vals[2] || "0");
+                const pts = (vals[3] || "0");
+                
+                if (pos === "Position" || !name) return;
+
+                let category = "";
+                if (pos.includes("Skip")) category = "Skip";
+                else if (pos.includes("Vice") || pos.includes("Third")) category = "Vice";
+                else if (pos.includes("Second")) category = "Second";
+                else if (pos.includes("Lead")) category = "Lead";
+
+                if (category) {
+                    allStandings[category].push({ name, ends: parseFloat(ends), pts: parseFloat(pts) });
+                }
+            });
+
+            Object.keys(allStandings).forEach(pos => {
+                allStandings[pos].sort((a, b) => b.pts !== a.pts ? b.pts - a.pts : b.ends - a.ends);
+            });
         }
 
-        function renderStandings(data) {
-            if (data.length === 0) return;
-            const headers = Object.keys(data[0]);
-            
-            // Render Header
-            document.getElementById('standings-header').innerHTML = headers.map(h => 
-                `<th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">${h}</th>`
-            ).join('');
+        function processSchedule(rows) {
+            allGames = {};
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row || row.length < 5) continue;
 
-            // Render Rows
-            document.getElementById('standings-body').innerHTML = data.map(row => `
-                <tr class="hover:bg-gray-50">
-                    ${headers.map(h => `<td class="px-4 py-3 whitespace-nowrap font-medium ${h === 'Team' ? 'text-gray-900' : ''}">${row[h]}</td>`).join('')}
-                </tr>
-            `).join('');
+                const date = (row[0] || "").trim();
+                const round = (row[1] || "").trim();
+                const gameNum = (row[2] || "").trim();
+                const sheetRaw = (row[3] || "").trim();
+                const skip = (row[4] || "").trim();
+                const vice = (row[5] || "").trim();
+                const second = (row[6] || "").trim();
+                const lead = (row[7] || "").trim();
+
+                if (!date || date.toLowerCase() === "date" || !sheetRaw) continue;
+
+                if (!allGames[date]) allGames[date] = {};
+                const sheetId = sheetRaw.toLowerCase().replace("sheet", "").trim();
+
+                if (!allGames[date][sheetId]) {
+                    allGames[date][sheetId] = { 
+                        sheetDisplay: sheetRaw, 
+                        round, 
+                        gameNum, 
+                        teams: [] 
+                    };
+                }
+                allGames[date][sheetId].teams.push({ skip, vice, second, lead });
+            }
+
+            const dateSelect = document.getElementById('date-select');
+            const dates = Object.keys(allGames).sort((a, b) => new Date(a) - new Date(b));
+            dateSelect.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join('');
+            if (dates.length > 0) filterScheduleByDate(dates[0]);
+        }
+
+        function getTeamHtml(team) {
+            if (!team || !team.skip) return `<div class="flex-1 text-center text-slate-400 font-bold italic py-4">BYE</div>`;
+            return `
+                <div class="flex-1">
+                    <div class="font-black text-[#a63a2a] text-sm uppercase leading-tight">${team.skip}</div>
+                    <div class="text-[10px] text-[#2d3e50] leading-none mt-2 space-y-1">
+                        <div><span class="font-black text-[#a63a2a]">V:</span> ${team.vice || '-'}</div>
+                        <div><span class="font-black text-[#a63a2a]">2:</span> ${team.second || '-'}</div>
+                        <div><span class="font-black text-[#a63a2a]">L:</span> ${team.lead || '-'}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function filterScheduleByDate(date) {
+            const list = document.getElementById('schedule-list');
+            const banner = document.getElementById('round-banner');
+            const roundText = document.getElementById('round-text');
+            const dateGames = allGames[date];
+            
+            if (!dateGames) {
+                list.innerHTML = `<div class="text-center p-10 text-[#735338] uppercase font-bold text-xs italic">No data.</div>`;
+                return;
+            }
+
+            const sheetKeys = Object.keys(dateGames).sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0));
+            
+            if (sheetKeys.length > 0) {
+                const first = dateGames[sheetKeys[0]];
+                roundText.innerText = `Round ${first.round} • Game ${first.gameNum}`;
+                banner.classList.remove('hidden');
+            }
+
+            list.innerHTML = sheetKeys.map(sId => {
+                const game = dateGames[sId];
+                const team1 = game.teams[0];
+                const team2 = game.teams[1];
+                let label = game.sheetDisplay;
+                if (!label.toLowerCase().includes("sheet")) label = "Sheet " + label;
+
+                return `
+                    <div class="glass-card rounded-lg overflow-hidden border-2 border-[#d9c5a0]">
+                        <div class="bg-[#f4eee1] px-4 py-1.5 border-b-2 border-[#d9c5a0] text-center">
+                            <span class="text-[11px] font-black text-[#735338] uppercase tracking-[0.2em]">${label.toUpperCase()}</span>
+                        </div>
+                        <div class="p-4 flex items-start gap-4 bg-white">
+                            <div class="flex-1 text-right">${getTeamHtml(team1)}</div>
+                            <div class="pt-2 text-[10px] font-black text-[#d9c5a0] italic self-start mt-1">VS</div>
+                            <div class="flex-1 text-left">${getTeamHtml(team2)}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterStandings(pos) {
+            document.querySelectorAll('.pos-tab').forEach(btn => {
+                btn.classList.remove('bg-[#2d3e50]', 'text-white', 'border-[#1a252f]');
+                btn.classList.add('bg-white', 'text-[#735338]', 'border-[#d9c5a0]');
+            });
+            const activeBtn = document.getElementById(`btn-${pos}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-[#2d3e50]', 'text-white', 'border-[#1a252f]');
+                activeBtn.classList.remove('bg-white', 'text-[#735338]', 'border-[#d9c5a0]');
+            }
+
+            const list = document.getElementById('standings-list');
+            const players = allStandings[pos] || [];
+            
+            list.innerHTML = players.map((p, idx) => {
+                const isTop = idx < 3;
+                return `
+                    <div class="bg-white rounded-lg border-2 border-[#d9c5a0] p-3 flex items-center justify-between shadow-sm relative overflow-hidden">
+                        ${isTop ? `<div class="absolute top-0 right-0 w-8 h-8 bg-[#a63a2a] flex items-center justify-center transform rotate-45 translate-x-4 -translate-y-4 shadow-md"></div>` : ''}
+                        <div class="flex items-center gap-3 relative">
+                            <div class="w-8 h-8 flex items-center justify-center rounded bg-[#f4eee1] border border-[#d9c5a0] text-xs font-black text-[#a63a2a] shadow-inner">
+                                ${idx + 1}
+                            </div>
+                            <div class="font-black text-[#2d3e50] uppercase tracking-tight text-sm">${p.name}</div>
+                        </div>
+                        <div class="flex gap-4 text-right relative">
+                            <div><div class="text-[8px] uppercase font-black text-[#735338] tracking-widest">Points</div><div class="text-base font-black text-[#a63a2a]">${p.pts}</div></div>
+                            <div><div class="text-[8px] uppercase font-black text-[#735338] tracking-widest">Ends</div><div class="text-base font-black text-[#2d3e50]">${p.ends}</div></div>
+                        </div>
+                    </div>`;
+            }).join('');
         }
 
         function switchTab(tab) {
             const schView = document.getElementById('schedule-view');
             const stdView = document.getElementById('standings-view');
-            const navSch = document.getElementById('nav-schedule');
-            const navStd = document.getElementById('nav-standings');
+            const tSch = document.getElementById('tab-schedule');
+            const tStd = document.getElementById('tab-standings');
 
             if (tab === 'schedule') {
                 schView.classList.remove('hidden');
                 stdView.classList.add('hidden');
-                navSch.classList.add('active-tab');
-                navStd.classList.remove('active-tab');
+                tSch.classList.add('active-tab');
+                tSch.classList.remove('text-[#d9c5a0]');
+                tStd.classList.remove('active-tab');
+                tStd.classList.add('text-[#d9c5a0]');
             } else {
                 schView.classList.add('hidden');
                 stdView.classList.remove('hidden');
-                navStd.classList.add('active-tab');
-                navSch.classList.remove('active-tab');
+                tStd.classList.add('active-tab');
+                tStd.classList.remove('text-[#d9c5a0]');
+                tSch.classList.remove('active-tab');
+                tSch.classList.add('text-[#d9c5a0]');
+                filterStandings('Skip');
             }
-            window.scrollTo(0, 0);
         }
 
-        init();
+        loadAppData();
     </script>
 </body>
 </html>
