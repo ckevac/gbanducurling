@@ -67,6 +67,7 @@
         /* Section specific backgrounds */
         .view-schedule { background-color: #ebe2d0; min-height: calc(100vh - 300px); border-radius: 12px; }
         .view-standings { background-color: #ffffff; min-height: calc(100vh - 300px); border-radius: 12px; }
+        .view-info { background-color: #ffffff; min-height: calc(100vh - 300px); border-radius: 12px; }
 
         /* Improved Tier ribbons using clip-path */
         .ribbon-container {
@@ -129,8 +130,9 @@
         </div>
         
         <div class="max-w-md mx-auto flex bg-[#1a252f]">
-            <button onclick="switchTab('schedule')" id="tab-schedule" class="flex-1 py-4 text-xs font-black uppercase tracking-widest active-tab transition-all">Schedule</button>
-            <button onclick="switchTab('standings')" id="tab-standings" class="flex-1 py-4 text-xs font-black uppercase tracking-widest text-[#d9c5a0] transition-all">Standings</button>
+            <button onclick="switchTab('schedule')" id="tab-schedule" class="flex-1 py-4 text-[10px] font-black uppercase tracking-widest active-tab transition-all">Schedule</button>
+            <button onclick="switchTab('standings')" id="tab-standings" class="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-[#d9c5a0] transition-all">Standings</button>
+            <button onclick="switchTab('info')" id="tab-info" class="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-[#d9c5a0] transition-all">Information</button>
         </div>
     </header>
 
@@ -140,6 +142,7 @@
             <p class="mt-4 text-[#735338] font-bold italic uppercase text-xs tracking-widest">Polishing the Stones...</p>
         </div>
 
+        <!-- Schedule View -->
         <div id="schedule-view" class="hidden view-schedule p-4 space-y-4">
             <div class="relative">
                 <label for="date-select" class="block text-[10px] font-black text-[#735338] uppercase mb-1 ml-1 tracking-widest">Select Game Day</label>
@@ -154,6 +157,7 @@
             <div id="schedule-list" class="space-y-4 pt-2"></div>
         </div>
 
+        <!-- Standings View -->
         <div id="standings-view" class="hidden view-standings p-4 space-y-4">
             <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar" id="pos-tabs">
                 <button onclick="filterStandings('Skip')" id="btn-Skip" class="pos-tab px-5 py-2 rounded-lg bg-[#2d3e50] text-white text-[10px] font-black uppercase tracking-widest whitespace-nowrap border-b-4 border-[#1a252f]">Skips</button>
@@ -162,6 +166,48 @@
                 <button onclick="filterStandings('Lead')" id="btn-Lead" class="pos-tab px-5 py-2 rounded-lg bg-white border-2 border-[#d9c5a0] text-[#735338] text-[10px] font-black uppercase tracking-widest whitespace-nowrap border-b-4 border-[#d9c5a0]">Leads</button>
             </div>
             <div id="standings-list" class="space-y-3"></div>
+        </div>
+
+        <!-- Information View -->
+        <div id="info-view" class="hidden view-info p-6 space-y-8">
+            <section>
+                <h3 class="text-lg font-black uppercase tracking-widest text-[#a63a2a] border-b-2 border-[#d9c5a0] pb-2 mb-4">League Details</h3>
+                <div class="space-y-4 text-sm leading-relaxed text-[#2d3e50] font-medium">
+                    <p>The league plays out of the <span class="font-black text-[#735338]">Whitby Curling Club</span> every Monday from <span class="font-black italic">4:30 - 6:30 PM</span> from October - April.</p>
+                    <p>Members of the league consist of men from Durham and surrounding regions.</p>
+                    <div class="bg-[#f4eee1] p-4 rounded-lg border-l-4 border-[#a63a2a]">
+                        <p class="text-xs font-black uppercase tracking-widest text-[#735338] mb-1">Inquiries & Membership</p>
+                        <a href="mailto:gbanducurling@gmail.com" class="text-sm font-black text-[#a63a2a] break-all hover:underline">gbanducurling@gmail.com</a>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h3 class="text-lg font-black uppercase tracking-widest text-[#a63a2a] border-b-2 border-[#d9c5a0] pb-2 mb-4">Requesting a Spare</h3>
+                <div class="space-y-4 text-sm leading-relaxed text-[#2d3e50]">
+                    <p class="italic font-bold text-[#735338]">If you are going to be away or missing any games, take the following steps ASAP in the order listed:</p>
+                    
+                    <ol class="space-y-4">
+                        <li class="flex gap-4">
+                            <span class="w-6 h-6 rounded-full bg-[#2d3e50] text-white flex-shrink-0 flex items-center justify-center font-black text-xs">1</span>
+                            <p>Send a <span class="font-black uppercase">Text</span> message to <span class="font-bold text-[#a63a2a]">Jeff Sisson</span> and include your name and game date(s) you can’t make.</p>
+                        </li>
+                        <li class="flex gap-4">
+                            <span class="w-6 h-6 rounded-full bg-[#2d3e50] text-white flex-shrink-0 flex items-center justify-center font-black text-xs">2</span>
+                            <p>If you don’t have a cell phone, send an <span class="font-black uppercase">Email</span> to <span class="font-bold text-[#a63a2a]">Jeff</span> with your name and game date(s) you can’t make.</p>
+                        </li>
+                        <li class="flex gap-4">
+                            <span class="w-6 h-6 rounded-full bg-[#2d3e50] text-white flex-shrink-0 flex items-center justify-center font-black text-xs">3</span>
+                            <p>If you are unable to text or email, then <span class="font-black uppercase">Call Jeff</span> and leave a voice message with your name and game date(s) you can't make.</p>
+                        </li>
+                    </ol>
+
+                    <div class="bg-[#2d3e50] text-white p-4 rounded-lg text-xs leading-normal mt-6">
+                        <p class="mb-3">As Jeff becomes aware that spares are needed, he will contact the available spares and do his best to fill the vacancies as efficiently and effectively as possible.</p>
+                        <p>In the very rare event that we are unable to fill all spots, we will move players from other teams so that no team has less than 3 players and no games are left unplayed.</p>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
 
@@ -356,7 +402,6 @@
                             </div>
                             <div class="font-black text-[#2d3e50] uppercase tracking-tight text-base">${p.name}</div>
                         </div>
-                        <!-- Moved container over with pr-10 to avoid ribbon overlapping -->
                         <div class="flex text-right relative items-end pr-10">
                             <div class="opacity-60 w-12 mr-4">
                                 <div class="text-[7px] uppercase font-black text-[#735338] tracking-widest leading-none mb-1">Ends</div>
@@ -374,24 +419,36 @@
         function switchTab(tab) {
             const schView = document.getElementById('schedule-view');
             const stdView = document.getElementById('standings-view');
+            const infoView = document.getElementById('info-view');
+            
             const tSch = document.getElementById('tab-schedule');
             const tStd = document.getElementById('tab-standings');
+            const tInfo = document.getElementById('tab-info');
+
+            // Hide all
+            schView.classList.add('hidden');
+            stdView.classList.add('hidden');
+            infoView.classList.add('hidden');
+            
+            // Reset tab styles
+            [tSch, tStd, tInfo].forEach(t => {
+                t.classList.remove('active-tab');
+                t.classList.add('text-[#d9c5a0]');
+            });
 
             if (tab === 'schedule') {
                 schView.classList.remove('hidden');
-                stdView.classList.add('hidden');
                 tSch.classList.add('active-tab');
                 tSch.classList.remove('text-[#d9c5a0]');
-                tStd.classList.remove('active-tab');
-                tStd.classList.add('text-[#d9c5a0]');
-            } else {
-                schView.classList.add('hidden');
+            } else if (tab === 'standings') {
                 stdView.classList.remove('hidden');
                 tStd.classList.add('active-tab');
                 tStd.classList.remove('text-[#d9c5a0]');
-                tSch.classList.remove('active-tab');
-                tSch.classList.add('text-[#d9c5a0]');
                 filterStandings('Skip');
+            } else if (tab === 'info') {
+                infoView.classList.remove('hidden');
+                tInfo.classList.add('active-tab');
+                tInfo.classList.remove('text-[#d9c5a0]');
             }
         }
 
