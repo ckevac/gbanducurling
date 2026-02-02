@@ -64,9 +64,41 @@
             animation: marquee 15s linear infinite;
         }
         
-        /* New section specific backgrounds */
+        /* Section specific backgrounds */
         .view-schedule { background-color: #ebe2d0; min-height: calc(100vh - 300px); border-radius: 12px; }
         .view-standings { background-color: #ffffff; min-height: calc(100vh - 300px); border-radius: 12px; }
+
+        /* Improved Tier ribbons using clip-path */
+        .ribbon-container {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 40px;
+            height: 40px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .ribbon-shape {
+            width: 100%;
+            height: 100%;
+            clip-path: polygon(0 0, 100% 0, 100% 100%);
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-end;
+            padding-top: 4px;
+            padding-right: 6px;
+        }
+
+        .ribbon-a { background: #a63a2a; }
+        .ribbon-b { background: #2d3e50; }
+
+        .ribbon-text {
+            color: white;
+            font-weight: 900;
+            font-size: 12px;
+            line-height: 1;
+        }
     </style>
 </head>
 <body class="min-h-screen pb-24 font-sans">
@@ -81,7 +113,6 @@
     <!-- Header -->
     <header class="header-gradient text-white shadow-xl sticky top-9 z-50">
         <div class="max-w-md mx-auto px-4 py-6 flex items-center justify-center gap-4">
-            <!-- Logo Container -->
             <div class="w-28 h-28 rounded-full border-4 border-[#d9c5a0] overflow-hidden bg-white shadow-lg flex-shrink-0">
                 <img id="league-logo" 
                      src="https://lh3.googleusercontent.com/u/0/d/10gkXR4l-Mifhhz2hevWdFM8TZiqoIe52" 
@@ -109,7 +140,6 @@
             <p class="mt-4 text-[#735338] font-bold italic uppercase text-xs tracking-widest">Polishing the Stones...</p>
         </div>
 
-        <!-- Schedule View -->
         <div id="schedule-view" class="hidden view-schedule p-4 space-y-4">
             <div class="relative">
                 <label for="date-select" class="block text-[10px] font-black text-[#735338] uppercase mb-1 ml-1 tracking-widest">Select Game Day</label>
@@ -124,7 +154,6 @@
             <div id="schedule-list" class="space-y-4 pt-2"></div>
         </div>
 
-        <!-- Standings View -->
         <div id="standings-view" class="hidden view-standings p-4 space-y-4">
             <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar" id="pos-tabs">
                 <button onclick="filterStandings('Skip')" id="btn-Skip" class="pos-tab px-5 py-2 rounded-lg bg-[#2d3e50] text-white text-[10px] font-black uppercase tracking-widest whitespace-nowrap border-b-4 border-[#1a252f]">Skips</button>
@@ -237,15 +266,15 @@
             if (dates.length > 0) filterScheduleByDate(dates[0]);
         }
 
-        function getTeamHtml(team) {
+        function getTeamHtml(team, isRight = false) {
             if (!team || !team.skip) return `<div class="flex-1 text-center text-slate-400 font-bold italic py-4 text-lg">BYE</div>`;
             return `
-                <div class="flex-1">
-                    <div class="font-black text-[#a63a2a] text-lg uppercase leading-tight tracking-tight">${team.skip}</div>
-                    <div class="text-[11px] text-[#2d3e50] leading-none mt-3 space-y-1.5 font-bold uppercase">
-                        <div><span class="font-black text-[#a63a2a]">V:</span> ${team.vice || '-'}</div>
-                        <div><span class="font-black text-[#a63a2a]">2:</span> ${team.second || '-'}</div>
-                        <div><span class="font-black text-[#a63a2a]">L:</span> ${team.lead || '-'}</div>
+                <div class="flex-1 overflow-hidden">
+                    <div class="font-black text-[#a63a2a] text-[17px] uppercase leading-tight tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">${team.skip}</div>
+                    <div class="text-[11px] text-[#2d3e50] leading-none mt-3 space-y-1.5 font-bold uppercase ${isRight ? 'text-left' : 'text-right'}">
+                        <div class="whitespace-nowrap overflow-hidden text-ellipsis"><span class="font-black text-[#a63a2a]">V:</span> ${team.vice || '-'}</div>
+                        <div class="whitespace-nowrap overflow-hidden text-ellipsis"><span class="font-black text-[#a63a2a]">2:</span> ${team.second || '-'}</div>
+                        <div class="whitespace-nowrap overflow-hidden text-ellipsis"><span class="font-black text-[#a63a2a]">L:</span> ${team.lead || '-'}</div>
                     </div>
                 </div>
             `;
@@ -282,10 +311,10 @@
                         <div class="bg-[#f4eee1] px-4 py-2 border-b-2 border-[#d9c5a0] text-center">
                             <span class="text-xs font-black text-[#735338] uppercase tracking-[0.2em]">${label.toUpperCase()}</span>
                         </div>
-                        <div class="p-4 flex items-start gap-4 bg-white">
-                            <div class="flex-1 text-right">${getTeamHtml(team1)}</div>
-                            <div class="pt-4 text-[10px] font-black text-[#d9c5a0] italic self-start">VS</div>
-                            <div class="flex-1 text-left">${getTeamHtml(team2)}</div>
+                        <div class="p-3 flex items-start gap-2 bg-white">
+                            <div class="w-[45%] text-right">${getTeamHtml(team1, false)}</div>
+                            <div class="w-[10%] pt-4 text-[9px] font-black text-[#d9c5a0] italic text-center shrink-0">VS</div>
+                            <div class="w-[45%] text-left">${getTeamHtml(team2, true)}</div>
                         </div>
                     </div>
                 `;
@@ -305,20 +334,30 @@
 
             const list = document.getElementById('standings-list');
             const players = allStandings[pos] || [];
+            const totalCount = players.length;
             
             list.innerHTML = players.map((p, idx) => {
                 const isTop = idx < 4;
+                const isBottom = idx >= totalCount - 4 && totalCount > 4;
+                
+                let ribbonHtml = '';
+                if (isTop) {
+                    ribbonHtml = `<div class="ribbon-container"><div class="ribbon-shape ribbon-a"><span class="ribbon-text">A</span></div></div>`;
+                } else if (isBottom) {
+                    ribbonHtml = `<div class="ribbon-container"><div class="ribbon-shape ribbon-b"><span class="ribbon-text">B</span></div></div>`;
+                }
+
                 return `
                     <div class="bg-white rounded-lg border-2 border-[#d9c5a0] p-3 flex items-center justify-between shadow-sm relative overflow-hidden">
-                        ${isTop ? `<div class="absolute top-0 right-0 w-8 h-8 bg-[#a63a2a] flex items-center justify-center transform rotate-45 translate-x-4 -translate-y-4 shadow-md"></div>` : ''}
+                        ${ribbonHtml}
                         <div class="flex items-center gap-3 relative">
                             <div class="w-8 h-8 flex items-center justify-center rounded bg-[#f4eee1] border border-[#d9c5a0] text-xs font-black text-[#a63a2a] shadow-inner">
                                 ${idx + 1}
                             </div>
                             <div class="font-black text-[#2d3e50] uppercase tracking-tight text-base">${p.name}</div>
                         </div>
-                        <!-- Alignment Fix: Use flex with explicit width for the Ends column -->
-                        <div class="flex text-right relative items-end">
+                        <!-- Moved container over with pr-10 to avoid ribbon overlapping -->
+                        <div class="flex text-right relative items-end pr-10">
                             <div class="opacity-60 w-12 mr-4">
                                 <div class="text-[7px] uppercase font-black text-[#735338] tracking-widest leading-none mb-1">Ends</div>
                                 <div class="text-sm font-bold text-[#2d3e50] leading-none">${p.ends}</div>
