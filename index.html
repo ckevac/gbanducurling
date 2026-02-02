@@ -63,6 +63,10 @@
             white-space: nowrap;
             animation: marquee 15s linear infinite;
         }
+        
+        /* New section specific backgrounds */
+        .view-schedule { background-color: #ebe2d0; min-height: calc(100vh - 300px); border-radius: 12px; }
+        .view-standings { background-color: #ffffff; min-height: calc(100vh - 300px); border-radius: 12px; }
     </style>
 </head>
 <body class="min-h-screen pb-24 font-sans">
@@ -106,7 +110,7 @@
         </div>
 
         <!-- Schedule View -->
-        <div id="schedule-view" class="hidden space-y-4">
+        <div id="schedule-view" class="hidden view-schedule p-4 space-y-4">
             <div class="relative">
                 <label for="date-select" class="block text-[10px] font-black text-[#735338] uppercase mb-1 ml-1 tracking-widest">Select Game Day</label>
                 <select id="date-select" onchange="filterScheduleByDate(this.value)" class="w-full bg-white border-2 border-[#d9c5a0] rounded-lg px-4 py-3 font-black text-[#2d3e50] shadow-md focus:ring-2 focus:ring-[#a63a2a] outline-none uppercase text-sm">
@@ -121,7 +125,7 @@
         </div>
 
         <!-- Standings View -->
-        <div id="standings-view" class="hidden space-y-4">
+        <div id="standings-view" class="hidden view-standings p-4 space-y-4">
             <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar" id="pos-tabs">
                 <button onclick="filterStandings('Skip')" id="btn-Skip" class="pos-tab px-5 py-2 rounded-lg bg-[#2d3e50] text-white text-[10px] font-black uppercase tracking-widest whitespace-nowrap border-b-4 border-[#1a252f]">Skips</button>
                 <button onclick="filterStandings('Vice')" id="btn-Vice" class="pos-tab px-5 py-2 rounded-lg bg-white border-2 border-[#d9c5a0] text-[#735338] text-[10px] font-black uppercase tracking-widest whitespace-nowrap border-b-4 border-[#d9c5a0]">Vices</button>
@@ -313,14 +317,15 @@
                             </div>
                             <div class="font-black text-[#2d3e50] uppercase tracking-tight text-base">${p.name}</div>
                         </div>
-                        <div class="flex gap-6 text-right relative items-end">
-                            <div>
-                                <div class="text-[8px] uppercase font-black text-[#735338] tracking-widest leading-none mb-1">Points</div>
-                                <div class="text-2xl font-black text-[#a63a2a] leading-none">${p.pts}</div>
-                            </div>
-                            <div class="opacity-60">
+                        <!-- Alignment Fix: Use flex with explicit width for the Ends column -->
+                        <div class="flex text-right relative items-end">
+                            <div class="opacity-60 w-12 mr-4">
                                 <div class="text-[7px] uppercase font-black text-[#735338] tracking-widest leading-none mb-1">Ends</div>
                                 <div class="text-sm font-bold text-[#2d3e50] leading-none">${p.ends}</div>
+                            </div>
+                            <div class="w-12">
+                                <div class="text-[8px] uppercase font-black text-[#735338] tracking-widest leading-none mb-1">Points</div>
+                                <div class="text-2xl font-black text-[#a63a2a] leading-none">${p.pts}</div>
                             </div>
                         </div>
                     </div>`;
