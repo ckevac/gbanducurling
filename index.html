@@ -19,9 +19,9 @@
         body { background-color: var(--paper-white); color: var(--bandit-navy); }
         
         .active-tab { 
-            color: var(--bandit-red); 
-            border-bottom: 3px solid var(--bandit-red); 
-            background: rgba(166, 58, 42, 0.05);
+            color: var(--vintage-tan); 
+            border-bottom: 4px solid var(--vintage-tan); 
+            background: rgba(217, 197, 160, 0.15);
         }
 
         .loading-spinner { 
@@ -53,15 +53,32 @@
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .animate-marquee {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee 15s linear infinite;
+        }
     </style>
 </head>
 <body class="min-h-screen pb-24 font-sans">
 
+    <!-- Announcement Banner -->
+    <div class="bg-[#a63a2a] text-white py-2 overflow-hidden border-b-2 border-black sticky top-0 z-[60]">
+        <div class="animate-marquee font-black uppercase tracking-widest text-sm">
+            🚨 NO CURLING ON FEBRUARY 16 • NO CURLING ON FEBRUARY 16 • NO CURLING ON FEBRUARY 16 • NO CURLING ON FEBRUARY 16 🚨
+        </div>
+    </div>
+
     <!-- Header -->
-    <header class="header-gradient text-white shadow-xl sticky top-0 z-50">
-        <div class="max-w-md mx-auto px-4 py-4 flex items-center justify-center gap-4">
+    <header class="header-gradient text-white shadow-xl sticky top-9 z-50">
+        <div class="max-w-md mx-auto px-4 py-6 flex items-center justify-center gap-4">
             <!-- Logo Container -->
-            <div class="w-20 h-20 rounded-full border-4 border-[#d9c5a0] overflow-hidden bg-white shadow-lg flex-shrink-0">
+            <div class="w-28 h-28 rounded-full border-4 border-[#d9c5a0] overflow-hidden bg-white shadow-lg flex-shrink-0">
                 <img id="league-logo" 
                      src="https://lh3.googleusercontent.com/u/0/d/10gkXR4l-Mifhhz2hevWdFM8TZiqoIe52" 
                      alt="League Logo" 
@@ -77,8 +94,8 @@
         </div>
         
         <div class="max-w-md mx-auto flex bg-[#1a252f]">
-            <button onclick="switchTab('schedule')" id="tab-schedule" class="flex-1 py-3 text-xs font-bold uppercase tracking-widest active-tab transition-all">Schedule</button>
-            <button onclick="switchTab('standings')" id="tab-standings" class="flex-1 py-3 text-xs font-bold uppercase tracking-widest text-[#d9c5a0] transition-all">Standings</button>
+            <button onclick="switchTab('schedule')" id="tab-schedule" class="flex-1 py-4 text-xs font-black uppercase tracking-widest active-tab transition-all">Schedule</button>
+            <button onclick="switchTab('standings')" id="tab-standings" class="flex-1 py-4 text-xs font-black uppercase tracking-widest text-[#d9c5a0] transition-all">Standings</button>
         </div>
     </header>
 
@@ -127,8 +144,7 @@
         let allStandings = { Skip: [], Vice: [], Second: [], Lead: [] };
 
         function handleLogoError(img) {
-            // If Drive direct link fails due to auth/permissions, fallback to a stylized placeholder
-            img.src = 'https://placehold.co/200x200/2d3e50/d9c5a0?text=GBU+CURLING';
+            img.src = 'https://placehold.co/400x400/2d3e50/d9c5a0?text=GBU+CURLING';
         }
 
         async function loadAppData() {
@@ -218,11 +234,11 @@
         }
 
         function getTeamHtml(team) {
-            if (!team || !team.skip) return `<div class="flex-1 text-center text-slate-400 font-bold italic py-4">BYE</div>`;
+            if (!team || !team.skip) return `<div class="flex-1 text-center text-slate-400 font-bold italic py-4 text-lg">BYE</div>`;
             return `
                 <div class="flex-1">
-                    <div class="font-black text-[#a63a2a] text-sm uppercase leading-tight">${team.skip}</div>
-                    <div class="text-[10px] text-[#2d3e50] leading-none mt-2 space-y-1">
+                    <div class="font-black text-[#a63a2a] text-lg uppercase leading-tight tracking-tight">${team.skip}</div>
+                    <div class="text-[11px] text-[#2d3e50] leading-none mt-3 space-y-1.5 font-bold uppercase">
                         <div><span class="font-black text-[#a63a2a]">V:</span> ${team.vice || '-'}</div>
                         <div><span class="font-black text-[#a63a2a]">2:</span> ${team.second || '-'}</div>
                         <div><span class="font-black text-[#a63a2a]">L:</span> ${team.lead || '-'}</div>
@@ -259,12 +275,12 @@
 
                 return `
                     <div class="glass-card rounded-lg overflow-hidden border-2 border-[#d9c5a0]">
-                        <div class="bg-[#f4eee1] px-4 py-1.5 border-b-2 border-[#d9c5a0] text-center">
-                            <span class="text-[11px] font-black text-[#735338] uppercase tracking-[0.2em]">${label.toUpperCase()}</span>
+                        <div class="bg-[#f4eee1] px-4 py-2 border-b-2 border-[#d9c5a0] text-center">
+                            <span class="text-xs font-black text-[#735338] uppercase tracking-[0.2em]">${label.toUpperCase()}</span>
                         </div>
                         <div class="p-4 flex items-start gap-4 bg-white">
                             <div class="flex-1 text-right">${getTeamHtml(team1)}</div>
-                            <div class="pt-2 text-[10px] font-black text-[#d9c5a0] italic self-start mt-1">VS</div>
+                            <div class="pt-4 text-[10px] font-black text-[#d9c5a0] italic self-start">VS</div>
                             <div class="flex-1 text-left">${getTeamHtml(team2)}</div>
                         </div>
                     </div>
@@ -287,7 +303,7 @@
             const players = allStandings[pos] || [];
             
             list.innerHTML = players.map((p, idx) => {
-                const isTop = idx < 3;
+                const isTop = idx < 4;
                 return `
                     <div class="bg-white rounded-lg border-2 border-[#d9c5a0] p-3 flex items-center justify-between shadow-sm relative overflow-hidden">
                         ${isTop ? `<div class="absolute top-0 right-0 w-8 h-8 bg-[#a63a2a] flex items-center justify-center transform rotate-45 translate-x-4 -translate-y-4 shadow-md"></div>` : ''}
@@ -295,11 +311,17 @@
                             <div class="w-8 h-8 flex items-center justify-center rounded bg-[#f4eee1] border border-[#d9c5a0] text-xs font-black text-[#a63a2a] shadow-inner">
                                 ${idx + 1}
                             </div>
-                            <div class="font-black text-[#2d3e50] uppercase tracking-tight text-sm">${p.name}</div>
+                            <div class="font-black text-[#2d3e50] uppercase tracking-tight text-base">${p.name}</div>
                         </div>
-                        <div class="flex gap-4 text-right relative">
-                            <div><div class="text-[8px] uppercase font-black text-[#735338] tracking-widest">Points</div><div class="text-base font-black text-[#a63a2a]">${p.pts}</div></div>
-                            <div><div class="text-[8px] uppercase font-black text-[#735338] tracking-widest">Ends</div><div class="text-base font-black text-[#2d3e50]">${p.ends}</div></div>
+                        <div class="flex gap-6 text-right relative items-end">
+                            <div>
+                                <div class="text-[8px] uppercase font-black text-[#735338] tracking-widest leading-none mb-1">Points</div>
+                                <div class="text-2xl font-black text-[#a63a2a] leading-none">${p.pts}</div>
+                            </div>
+                            <div class="opacity-60">
+                                <div class="text-[7px] uppercase font-black text-[#735338] tracking-widest leading-none mb-1">Ends</div>
+                                <div class="text-sm font-bold text-[#2d3e50] leading-none">${p.ends}</div>
+                            </div>
                         </div>
                     </div>`;
             }).join('');
