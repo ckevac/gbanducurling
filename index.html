@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Good, the Bad, and the Ugly Curling League</title>
+    <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="https://lh3.googleusercontent.com/u/0/d/10gkXR4l-Mifhhz2hevWdFM8TZiqoIe52">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -65,12 +67,10 @@
             animation: marquee 15s linear infinite;
         }
         
-        /* Section specific backgrounds */
         .view-schedule { background-color: #ebe2d0; min-height: calc(100vh - 300px); border-radius: 12px; }
         .view-standings { background-color: #ffffff; min-height: calc(100vh - 300px); border-radius: 12px; }
         .view-info { background-color: #ffffff; min-height: calc(100vh - 300px); border-radius: 12px; }
 
-        /* Improved Tier ribbons using clip-path */
         .ribbon-container {
             position: absolute;
             top: 0;
@@ -102,6 +102,12 @@
             line-height: 1;
         }
     </style>
+    <!-- iOS Web App Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GBU Curling">
+    <!-- Updated icon link to ensure Safari recognizes it as a direct image -->
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/10gkXR4l-Mifhhz2hevWdFM8TZiqoIe52">
 </head>
 <body class="min-h-screen pb-24 font-sans">
 
@@ -310,7 +316,6 @@
             const dateSelect = document.getElementById('date-select');
             const dates = Object.keys(allGames).sort((a, b) => new Date(a) - new Date(b));
             
-            // Logic to find the next game day
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             
@@ -446,12 +451,10 @@
             const tStd = document.getElementById('tab-standings');
             const tInfo = document.getElementById('tab-info');
 
-            // Hide all
             schView.classList.add('hidden');
             stdView.classList.add('hidden');
             infoView.classList.add('hidden');
             
-            // Reset tab styles
             [tSch, tStd, tInfo].forEach(t => {
                 t.classList.remove('active-tab');
                 t.classList.add('text-[#d9c5a0]');
