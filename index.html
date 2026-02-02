@@ -308,8 +308,28 @@
 
             const dateSelect = document.getElementById('date-select');
             const dates = Object.keys(allGames).sort((a, b) => new Date(a) - new Date(b));
-            dateSelect.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join('');
-            if (dates.length > 0) filterScheduleByDate(dates[0]);
+            
+            // Logic to find the next game day
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            let defaultDate = dates.length > 0 ? dates[0] : "";
+            
+            for (const dateStr of dates) {
+                const d = new Date(dateStr);
+                if (d >= today) {
+                    defaultDate = dateStr;
+                    break;
+                }
+            }
+
+            dateSelect.innerHTML = dates.map(d => `<option value="${d}" ${d === defaultDate ? 'selected' : ''}>${d}</option>`).join('');
+            
+            if (defaultDate) {
+                filterScheduleByDate(defaultDate);
+            } else if (dates.length > 0) {
+                filterScheduleByDate(dates[0]);
+            }
         }
 
         function getTeamHtml(team, isRight = false) {
