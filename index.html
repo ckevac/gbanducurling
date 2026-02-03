@@ -296,6 +296,11 @@
                 const vice = (row[5] || "").trim();
                 const second = (row[6] || "").trim();
                 const lead = (row[7] || "").trim();
+                
+                // New Data from Columns I, J, K (indices 8, 9, 10)
+                const score = (row[8] || "").trim();
+                const endsWon = (row[9] || "").trim();
+                const result = (row[10] || "").trim();
 
                 if (!date || date.toLowerCase() === "date" || !sheetRaw) continue;
 
@@ -310,7 +315,7 @@
                         teams: [] 
                     };
                 }
-                allGames[date][sheetId].teams.push({ skip, vice, second, lead });
+                allGames[date][sheetId].teams.push({ skip, vice, second, lead, score, endsWon, result });
             }
 
             const dateSelect = document.getElementById('date-select');
@@ -340,10 +345,29 @@
 
         function getTeamHtml(team, isRight = false) {
             if (!team || !team.skip) return `<div class="flex-1 text-center text-slate-400 font-bold italic py-4 text-lg">BYE</div>`;
+            
+            // Check if game is completed by looking for result/score
+            const isCompleted = team.result && team.result !== "";
+            const resultColor = team.result === "W" ? "text-green-600" : (team.result === "L" ? "text-red-600" : "text-gray-500");
+
             return `
                 <div class="flex-1 overflow-hidden">
-                    <div class="font-black text-[#a63a2a] text-[17px] uppercase leading-tight tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">${team.skip}</div>
-                    <div class="text-[11px] text-[#2d3e50] leading-none mt-3 space-y-1.5 font-bold uppercase ${isRight ? 'text-left' : 'text-right'}">
+                    <div class="flex items-center gap-2 ${isRight ? 'flex-row-reverse' : 'flex-row'}">
+                        <div class="font-black text-[#a63a2a] text-[17px] uppercase leading-tight tracking-tight whitespace-nowrap overflow-hidden text-ellipsis">${team.skip}</div>
+                        ${isCompleted ? `<span class="text-[10px] font-black ${resultColor} shrink-0">[${team.result}]</span>` : ''}
+                    </div>
+                    
+                    ${isCompleted ? `
+                        <div class="mt-1 bg-[#f4eee1] py-1 px-2 rounded border border-[#d9c5a0] inline-block">
+                             <div class="text-[14px] font-black text-[#2d3e50] leading-none">
+                                ${team.score} <span class="text-[8px] font-bold text-[#735338] ml-1 uppercase">PTS</span> 
+                                <span class="mx-1 opacity-30">|</span> 
+                                ${team.endsWon} <span class="text-[8px] font-bold text-[#735338] ml-1 uppercase">ENDS</span>
+                             </div>
+                        </div>
+                    ` : ''}
+
+                    <div class="text-[10px] text-[#2d3e50] leading-none mt-3 space-y-1 font-bold uppercase ${isRight ? 'text-left' : 'text-right'} opacity-80">
                         <div class="whitespace-nowrap overflow-hidden text-ellipsis"><span class="font-black text-[#a63a2a]">V:</span> ${team.vice || '-'}</div>
                         <div class="whitespace-nowrap overflow-hidden text-ellipsis"><span class="font-black text-[#a63a2a]">2:</span> ${team.second || '-'}</div>
                         <div class="whitespace-nowrap overflow-hidden text-ellipsis"><span class="font-black text-[#a63a2a]">L:</span> ${team.lead || '-'}</div>
