@@ -46,7 +46,7 @@
             border-bottom: 4px solid var(--rope-brown);
         }
 
-        /* LANDSCAPE OPTIMIZATION: Shrink header when screen height is small */
+        /* LANDSCAPE OPTIMIZATION */
         @media (max-height: 500px) and (orientation: landscape) {
             header .logo-container { width: 32px; height: 32px; border-width: 1px; }
             header .main-header-content { padding-top: 0.25rem; padding-bottom: 0.25rem; gap: 0.5rem !important; }
@@ -106,7 +106,6 @@
 
         .ribbon-text { color: white; font-weight: 900; font-size: 10px; }
 
-        /* Hide Scrollbar for standings tabs */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -180,7 +179,8 @@
                 <button onclick="filterStandings('Second')" id="btn-Second" class="pos-tab whitespace-nowrap px-4 py-2 rounded bg-white border border-[#d9c5a0] text-[#735338] text-[9px] sm:text-xs font-black uppercase tracking-widest border-b-2 flex-shrink-0">Seconds</button>
                 <button onclick="filterStandings('Lead')" id="btn-Lead" class="pos-tab whitespace-nowrap px-4 py-2 rounded bg-white border border-[#d9c5a0] text-[#735338] text-[9px] sm:text-xs font-black uppercase tracking-widest border-b-2 flex-shrink-0">Leads</button>
             </div>
-            <div id="standings-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+            <!-- Changed to max-width and centered for a single column look -->
+            <div id="standings-list" class="flex flex-col gap-3 max-w-xl mx-auto"></div>
         </div>
 
         <!-- Information View -->
@@ -258,7 +258,13 @@
                 let category = pos.includes("Skip") ? "Skip" : (pos.includes("Vice") || pos.includes("Third") ? "Vice" : (pos.includes("Second") ? "Second" : (pos.includes("Lead") ? "Lead" : "")));
                 if (category) allStandings[category].push({ name, ends: parseFloat(ends), pts: parseFloat(pts) });
             });
-            Object.keys(allStandings).forEach(pos => allStandings[pos].sort((a, b) => b.pts !== a.pts ? b.pts - a.pts : b.ends - a.ends));
+            // Primary Sort: Points (pts), Secondary Sort: Ends (ends)
+            Object.keys(allStandings).forEach(pos => {
+                allStandings[pos].sort((a, b) => {
+                    if (b.pts !== a.pts) return b.pts - a.pts;
+                    return b.ends - a.ends;
+                });
+            });
         }
 
         function processSchedule(rows) {
@@ -319,10 +325,11 @@
         function renderTeam(team, isRight) {
             if (!team || !team.skip) return `<div class="flex-1 text-[10px] opacity-40 italic">BYE</div>`;
             const resColor = team.result === "W" ? "text-green-600" : (team.result === "L" ? "text-red-600" : "text-gray-400");
+            const resultLabel = team.result ? `[${team.result}]` : '';
             return `
                 <div class="flex-1 min-w-0 ${isRight ? 'text-left' : 'text-right'}">
                     <div class="font-black text-[#a63a2a] text-xs sm:text-sm uppercase leading-tight truncate">${team.skip}</div>
-                    ${team.result ? `<div class="text-[9px] font-black ${resColor} mt-0.5">${team.score} PTS | ${team.endsWon} ENDS</div>` : ''}
+                    ${team.result ? `<div class="text-[9px] font-black ${resColor} mt-0.5">${resultLabel} ${team.score} PTS | ${team.endsWon} ENDS</div>` : ''}
                 </div>`;
         }
 
@@ -346,11 +353,17 @@
                         ${ribbon}
                         <div class="flex items-center gap-2">
                             <span class="w-6 h-6 flex items-center justify-center bg-[#f4eee1] rounded text-[10px] font-black text-[#a63a2a]">${idx + 1}</span>
-                            <span class="font-black text-[#2d3e50] uppercase text-[11px] truncate max-w-[100px]">${p.name}</span>
+                            <span class="font-black text-[#2d3e50] uppercase text-[11px] truncate max-w-[120px]">${p.name}</span>
                         </div>
-                        <div class="flex items-baseline gap-2 pr-6">
-                            <span class="text-[8px] font-bold opacity-40 uppercase">Pts</span>
-                            <span class="text-base font-black text-[#a63a2a]">${p.pts}</span>
+                        <div class="flex items-baseline gap-3 pr-6">
+                            <div class="flex flex-col items-end">
+                                <span class="text-[7px] font-bold opacity-40 uppercase leading-none">Ends</span>
+                                <span class="text-[10px] font-black text-[#735338]">${p.ends}</span>
+                            </div>
+                            <div class="flex flex-col items-end">
+                                <span class="text-[7px] font-bold opacity-40 uppercase leading-none">Pts</span>
+                                <span class="text-base font-black text-[#a63a2a]">${p.pts}</span>
+                            </div>
                         </div>
                     </div>`;
             }).join('');
