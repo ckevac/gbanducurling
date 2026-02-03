@@ -39,13 +39,22 @@
             background: white; 
             border: 1px solid var(--vintage-tan);
             box-shadow: 0 4px 6px -1px rgba(115, 83, 56, 0.1);
-            transition: transform 0.2s ease;
         }
-        .glass-card:hover { transform: translateY(-2px); }
 
         .header-gradient {
             background: linear-gradient(to bottom, #2d3e50, #1a252f);
             border-bottom: 4px solid var(--rope-brown);
+        }
+
+        /* LANDSCAPE OPTIMIZATION: Shrink header when screen height is small */
+        @media (max-height: 500px) and (orientation: landscape) {
+            header .logo-container { width: 40px; height: 40px; border-width: 2px; }
+            header .main-header-content { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+            header h2 { font-size: 1.1rem !important; }
+            header h1 { display: none; }
+            .announcement-banner { padding-top: 0.25rem; padding-bottom: 0.25rem; font-size: 0.7rem; }
+            .sticky-nav-offset { top: 1.5rem !important; }
+            header .tab-btn { py: 0.5rem !important; font-size: 9px !important; }
         }
 
         select { 
@@ -55,9 +64,6 @@
             background-position: right 1rem center;
             background-size: 1.5em;
         }
-
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         @keyframes marquee {
             0% { transform: translateX(100%); }
@@ -70,16 +76,15 @@
         }
         
         .view-schedule, .view-standings, .view-info { 
-            min-height: calc(100vh - 250px); 
-            border-radius: 12px;
+            min-height: calc(100vh - 200px); 
         }
 
         .ribbon-container {
             position: absolute;
             top: 0;
             right: 0;
-            width: 40px;
-            height: 40px;
+            width: 32px;
+            height: 32px;
             pointer-events: none;
             z-index: 10;
         }
@@ -91,19 +96,14 @@
             display: flex;
             align-items: flex-start;
             justify-content: flex-end;
-            padding-top: 4px;
-            padding-right: 6px;
+            padding-top: 2px;
+            padding-right: 4px;
         }
 
         .ribbon-a { background: #a63a2a; }
         .ribbon-b { background: #2d3e50; }
 
-        .ribbon-text {
-            color: white;
-            font-weight: 900;
-            font-size: 12px;
-            line-height: 1;
-        }
+        .ribbon-text { color: white; font-weight: 900; font-size: 10px; }
     </style>
     <!-- iOS Web App Support -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -114,16 +114,16 @@
 <body class="min-h-screen pb-12 font-sans text-sm">
 
     <!-- Announcement Banner -->
-    <div class="bg-[#a63a2a] text-white py-2 overflow-hidden border-b-2 border-black sticky top-0 z-[60]">
-        <div class="animate-marquee font-black uppercase tracking-widest text-xs sm:text-sm">
+    <div class="announcement-banner bg-[#a63a2a] text-white py-2 overflow-hidden border-b-2 border-black sticky top-0 z-[60]">
+        <div class="animate-marquee font-black uppercase tracking-widest text-[10px] sm:text-sm">
             🚨 NO CURLING ON FEBRUARY 16 • NO CURLING ON FEBRUARY 16 • NO CURLING ON FEBRUARY 16 • NO CURLING ON FEBRUARY 16 • NO CURLING ON FEBRUARY 16 🚨
         </div>
     </div>
 
     <!-- Header -->
-    <header class="header-gradient text-white shadow-xl sticky top-8 sm:top-9 z-50">
-        <div class="max-w-5xl mx-auto px-4 py-4 sm:py-6 flex flex-row items-center justify-center gap-4 sm:gap-8">
-            <div class="w-20 h-20 sm:w-28 sm:h-28 rounded-full border-4 border-[#d9c5a0] overflow-hidden bg-white shadow-lg flex-shrink-0">
+    <header class="header-gradient text-white shadow-xl sticky top-[28px] sm:top-[36px] z-50 sticky-nav-offset">
+        <div class="main-header-content max-w-5xl mx-auto px-4 py-3 sm:py-6 flex flex-row items-center justify-center gap-3 sm:gap-8">
+            <div class="logo-container w-12 h-12 sm:w-24 sm:h-24 rounded-full border-2 sm:border-4 border-[#d9c5a0] overflow-hidden bg-white shadow-lg flex-shrink-0">
                 <img id="league-logo" 
                      src="https://lh3.googleusercontent.com/u/0/d/10gkXR4l-Mifhhz2hevWdFM8TZiqoIe52" 
                      alt="League Logo" 
@@ -132,104 +132,84 @@
             </div>
             
             <div class="flex flex-col">
-                <h1 class="text-[10px] sm:text-xs font-black uppercase tracking-tighter leading-tight italic opacity-90">The Good, the Bad, & the Ugly</h1>
-                <h2 class="text-xl sm:text-3xl font-black uppercase tracking-widest text-[#d9c5a0] leading-none">Curling</h2>
-                <h2 class="text-lg sm:text-2xl font-black uppercase tracking-widest text-[#d9c5a0] leading-tight">League</h2>
+                <h1 class="text-[9px] sm:text-xs font-black uppercase tracking-tighter leading-tight italic opacity-90 hidden xs:block">The Good, the Bad, & the Ugly</h1>
+                <div class="flex flex-row gap-2 items-baseline">
+                    <h2 class="text-base sm:text-3xl font-black uppercase tracking-widest text-[#d9c5a0] leading-none">Curling</h2>
+                    <h2 class="text-base sm:text-2xl font-black uppercase tracking-widest text-[#d9c5a0] leading-tight">League</h2>
+                </div>
             </div>
         </div>
         
         <div class="max-w-5xl mx-auto flex bg-[#1a252f] border-x border-[#1a252f]">
-            <button onclick="switchTab('schedule')" id="tab-schedule" class="flex-1 py-4 text-[10px] sm:text-xs font-black uppercase tracking-widest active-tab transition-all">Schedule</button>
-            <button onclick="switchTab('standings')" id="tab-standings" class="flex-1 py-4 text-[10px] sm:text-xs font-black uppercase tracking-widest text-[#d9c5a0] transition-all">Standings</button>
-            <button onclick="switchTab('info')" id="tab-info" class="flex-1 py-4 text-[10px] sm:text-xs font-black uppercase tracking-widest text-[#d9c5a0] transition-all">Information</button>
+            <button onclick="switchTab('schedule')" id="tab-schedule" class="tab-btn flex-1 py-3 sm:py-4 text-[9px] sm:text-xs font-black uppercase tracking-widest active-tab transition-all">Schedule</button>
+            <button onclick="switchTab('standings')" id="tab-standings" class="tab-btn flex-1 py-3 sm:py-4 text-[9px] sm:text-xs font-black uppercase tracking-widest text-[#d9c5a0] transition-all">Standings</button>
+            <button onclick="switchTab('info')" id="tab-info" class="tab-btn flex-1 py-3 sm:py-4 text-[9px] sm:text-xs font-black uppercase tracking-widest text-[#d9c5a0] transition-all">Info</button>
         </div>
     </header>
 
     <main class="max-w-5xl mx-auto p-4 sm:p-6">
         <div id="loading" class="flex flex-col items-center justify-center mt-20">
             <div class="loading-spinner"></div>
-            <p class="mt-4 text-[#735338] font-bold italic uppercase text-xs tracking-widest">Polishing the Stones...</p>
+            <p class="mt-4 text-[#735338] font-bold italic uppercase text-[10px] tracking-widest">Polishing the Stones...</p>
         </div>
 
         <!-- Schedule View -->
-        <div id="schedule-view" class="hidden view-schedule p-4 space-y-6">
-            <div class="max-w-md mx-auto relative">
-                <label for="date-select" class="block text-[10px] font-black text-[#735338] uppercase mb-1 ml-1 tracking-widest">Select Game Day</label>
-                <select id="date-select" onchange="filterScheduleByDate(this.value)" class="w-full bg-white border-2 border-[#d9c5a0] rounded-lg px-4 py-3 font-black text-[#2d3e50] shadow-md focus:ring-2 focus:ring-[#a63a2a] outline-none uppercase text-sm cursor-pointer">
+        <div id="schedule-view" class="hidden view-schedule space-y-4">
+            <div class="max-w-md mx-auto relative mt-2">
+                <select id="date-select" onchange="filterScheduleByDate(this.value)" class="w-full bg-white border-2 border-[#d9c5a0] rounded-lg px-4 py-2 font-black text-[#2d3e50] shadow-sm focus:ring-2 focus:ring-[#a63a2a] outline-none uppercase text-xs cursor-pointer">
                 </select>
             </div>
             
-            <div id="round-banner" class="hidden max-w-sm mx-auto bg-[#a63a2a] border-2 border-[#735338] rounded-lg p-2 text-center shadow-lg">
-                <span id="round-text" class="text-xs font-black text-white uppercase tracking-widest italic"></span>
+            <div id="round-banner" class="hidden max-w-xs mx-auto bg-[#a63a2a] border border-[#735338] rounded p-1.5 text-center">
+                <span id="round-text" class="text-[10px] font-black text-white uppercase tracking-widest italic"></span>
             </div>
             
-            <div id="schedule-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 pt-2"></div>
+            <div id="schedule-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2"></div>
         </div>
 
         <!-- Standings View -->
-        <div id="standings-view" class="hidden view-standings p-4 space-y-6">
-            <div class="flex flex-wrap justify-center gap-2 pb-2 no-scrollbar" id="pos-tabs">
-                <button onclick="filterStandings('Skip')" id="btn-Skip" class="pos-tab px-6 py-3 rounded-lg bg-[#2d3e50] text-white text-[10px] sm:text-xs font-black uppercase tracking-widest border-b-4 border-[#1a252f] transition-all">Skips</button>
-                <button onclick="filterStandings('Vice')" id="btn-Vice" class="pos-tab px-6 py-3 rounded-lg bg-white border-2 border-[#d9c5a0] text-[#735338] text-[10px] sm:text-xs font-black uppercase tracking-widest border-b-4 border-[#d9c5a0] transition-all">Vices</button>
-                <button onclick="filterStandings('Second')" id="btn-Second" class="pos-tab px-6 py-3 rounded-lg bg-white border-2 border-[#d9c5a0] text-[#735338] text-[10px] sm:text-xs font-black uppercase tracking-widest border-b-4 border-[#d9c5a0] transition-all">Seconds</button>
-                <button onclick="filterStandings('Lead')" id="btn-Lead" class="pos-tab px-6 py-3 rounded-lg bg-white border-2 border-[#d9c5a0] text-[#735338] text-[10px] sm:text-xs font-black uppercase tracking-widest border-b-4 border-[#d9c5a0] transition-all">Leads</button>
+        <div id="standings-view" class="hidden view-standings space-y-4">
+            <div class="flex flex-wrap justify-center gap-2" id="pos-tabs">
+                <button onclick="filterStandings('Skip')" id="btn-Skip" class="pos-tab px-4 py-2 rounded bg-[#2d3e50] text-white text-[9px] sm:text-xs font-black uppercase tracking-widest border-b-2 border-[#1a252f]">Skips</button>
+                <button onclick="filterStandings('Vice')" id="btn-Vice" class="pos-tab px-4 py-2 rounded bg-white border border-[#d9c5a0] text-[#735338] text-[9px] sm:text-xs font-black uppercase tracking-widest border-b-2">Vices</button>
+                <button onclick="filterStandings('Second')" id="btn-Second" class="pos-tab px-4 py-2 rounded bg-white border border-[#d9c5a0] text-[#735338] text-[9px] sm:text-xs font-black uppercase tracking-widest border-b-2">Seconds</button>
+                <button onclick="filterStandings('Lead')" id="btn-Lead" class="pos-tab px-4 py-2 rounded bg-white border border-[#d9c5a0] text-[#735338] text-[9px] sm:text-xs font-black uppercase tracking-widest border-b-2">Leads</button>
             </div>
-            <div id="standings-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            <div id="standings-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
         </div>
 
         <!-- Information View -->
-        <div id="info-view" class="hidden view-info p-4 sm:p-10 bg-white shadow-sm border border-[#d9c5a0]">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                <div class="space-y-10">
+        <div id="info-view" class="hidden view-info p-4 sm:p-10 bg-white border border-[#d9c5a0]">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="space-y-6">
                     <section>
-                        <h3 class="text-xl font-black uppercase tracking-widest text-[#a63a2a] border-b-2 border-[#d9c5a0] pb-2 mb-4">League Details</h3>
-                        <div class="space-y-4 text-base leading-relaxed text-[#2d3e50]">
-                            <p>The league plays out of the <span class="font-black text-[#735338]">Whitby Curling Club</span> every Monday from <span class="font-black italic">4:30 - 6:30 PM</span> from October - April.</p>
-                            <p>Members of the league consist of men from Durham and surrounding regions.</p>
-                        </div>
+                        <h3 class="text-lg font-black uppercase tracking-widest text-[#a63a2a] border-b-2 border-[#d9c5a0] pb-1 mb-3">League Info</h3>
+                        <p class="text-sm leading-relaxed text-[#2d3e50]">
+                            Plays out of the <span class="font-black text-[#735338]">Whitby Curling Club</span> every Monday from <span class="font-black italic">4:30 - 6:30 PM</span>.
+                        </p>
                     </section>
-
                     <section>
-                        <h3 class="text-xl font-black uppercase tracking-widest text-[#a63a2a] border-b-2 border-[#d9c5a0] pb-2 mb-4">Inquiries</h3>
-                        <div class="bg-[#f4eee1] p-6 rounded-lg border-2 border-[#d9c5a0] flex flex-col items-center text-center">
-                            <p class="text-xs font-black uppercase tracking-[0.2em] text-[#735338] mb-2">Membership & General Info</p>
-                            <a href="mailto:gbanducurling@gmail.com" class="text-lg font-black text-[#a63a2a] hover:underline decoration-2">gbanducurling@gmail.com</a>
-                        </div>
+                        <h3 class="text-lg font-black uppercase tracking-widest text-[#a63a2a] border-b-2 border-[#d9c5a0] pb-1 mb-3">Contact</h3>
+                        <a href="mailto:gbanducurling@gmail.com" class="text-base font-black text-[#a63a2a] hover:underline">gbanducurling@gmail.com</a>
                     </section>
                 </div>
-
                 <section>
-                    <h3 class="text-xl font-black uppercase tracking-widest text-[#a63a2a] border-b-2 border-[#d9c5a0] pb-2 mb-4">Absences & Spares</h3>
-                    <div class="space-y-6 text-sm sm:text-base leading-relaxed text-[#2d3e50]">
-                        <p class="italic font-bold text-[#735338] bg-[#f4eee1] p-3 border-l-4 border-[#a63a2a]">If you are going to be away or missing any games, take the following steps ASAP in the order listed:</p>
-                        
-                        <div class="space-y-5">
-                            <div class="flex gap-4 items-start p-3 bg-white border border-[#d9c5a0] rounded-lg shadow-sm">
-                                <div class="w-8 h-8 rounded bg-[#2d3e50] text-white flex-shrink-0 flex items-center justify-center font-black">1</div>
-                                <p>Send a <span class="font-black text-[#a63a2a] uppercase">Text</span> message to <span class="font-black">Jeff Sisson</span> and include your name and game date(s) you can’t make.</p>
-                            </div>
-                            <div class="flex gap-4 items-start p-3 bg-white border border-[#d9c5a0] rounded-lg shadow-sm">
-                                <div class="w-8 h-8 rounded bg-[#2d3e50] text-white flex-shrink-0 flex items-center justify-center font-black">2</div>
-                                <p>If you don’t have a cell phone, send an <span class="font-black text-[#a63a2a] uppercase">Email</span> to <span class="font-black">Jeff</span> with your name and game date(s) you can’t make.</p>
-                            </div>
-                            <div class="flex gap-4 items-start p-3 bg-white border border-[#d9c5a0] rounded-lg shadow-sm">
-                                <div class="w-8 h-8 rounded bg-[#2d3e50] text-white flex-shrink-0 flex items-center justify-center font-black">3</div>
-                                <p>If you are unable to text or email, then <span class="font-black text-[#a63a2a] uppercase">Call Jeff</span> and leave a voice message with your name and game date(s) you can't make.</p>
-                            </div>
-                        </div>
-
-                        <div class="bg-[#f4eee1] p-5 border-l-4 border-[#d9c5a0] text-sm italic">
-                            <p>As Jeff becomes aware that spares are needed, he will contact the available spares and fill vacancies as efficiently as possible.</p>
-                            <p class="mt-3">In rare cases where we cannot fill spots, we will move players from other teams so that no team has less than 3 players.</p>
-                        </div>
+                    <h3 class="text-lg font-black uppercase tracking-widest text-[#a63a2a] border-b-2 border-[#d9c5a0] pb-1 mb-3">Absences</h3>
+                    <div class="space-y-4 text-xs sm:text-sm text-[#2d3e50]">
+                        <p class="font-bold text-[#735338] bg-[#f4eee1] p-2 border-l-4 border-[#a63a2a]">Contact Jeff Sisson ASAP if missing a game:</p>
+                        <ul class="space-y-2">
+                            <li class="flex gap-2"><b>1.</b> Text Jeff with your name & game date.</li>
+                            <li class="flex gap-2"><b>2.</b> Email if no cell phone available.</li>
+                            <li class="flex gap-2"><b>3.</b> Call and leave a message if needed.</li>
+                        </ul>
                     </div>
                 </section>
             </div>
         </div>
     </main>
 
-    <footer class="max-w-5xl mx-auto px-6 py-12 text-center text-[#735338] text-[10px] font-bold uppercase tracking-widest opacity-60">
-        Whitby, Ontario • Established 2025 • Designed for all screens
+    <footer class="max-w-5xl mx-auto px-6 py-8 text-center text-[#735338] text-[9px] font-bold uppercase tracking-widest opacity-60">
+        Whitby, Ontario • Established 2025
     </footer>
 
     <script>
@@ -241,7 +221,7 @@
         let highestCompletedRound = 0;
 
         function handleLogoError(img) {
-            img.src = 'https://placehold.co/400x400/2d3e50/d9c5a0?text=GBU+CURLING';
+            img.src = 'https://placehold.co/200x200/2d3e50/d9c5a0?text=GBU';
         }
 
         async function loadAppData() {
@@ -251,18 +231,13 @@
                     fetch(STANDINGS_URL).then(r => r.text())
                 ]);
 
-                const schData = Papa.parse(schRaw, { header: false, skipEmptyLines: true }).data;
-                const stdData = Papa.parse(stdRaw, { header: true, skipEmptyLines: true }).data;
-
-                processStandings(stdData);
-                processSchedule(schData);
+                processStandings(Papa.parse(stdRaw, { header: true, skipEmptyLines: true }).data);
+                processSchedule(Papa.parse(schRaw, { header: false, skipEmptyLines: true }).data);
 
                 document.getElementById('loading').classList.add('hidden');
                 document.getElementById('schedule-view').classList.remove('hidden');
-                filterStandings('Skip');
             } catch (e) {
-                console.error(e);
-                document.getElementById('loading').innerHTML = `<div class="text-red-800 text-center p-10 font-black uppercase italic">Out of Bounds: Error Loading Data.</div>`;
+                document.getElementById('loading').innerHTML = `<div class="text-red-800 text-center p-10 font-black uppercase italic">Error Loading Data.</div>`;
             }
         }
 
@@ -274,115 +249,34 @@
                 const name = (vals[1] || "").trim();
                 const ends = (vals[2] || "0");
                 const pts = (vals[3] || "0");
-                
                 if (pos === "Position" || !name) return;
-
-                let category = "";
-                if (pos.includes("Skip")) category = "Skip";
-                else if (pos.includes("Vice") || pos.includes("Third")) category = "Vice";
-                else if (pos.includes("Second")) category = "Second";
-                else if (pos.includes("Lead")) category = "Lead";
-
-                if (category) {
-                    allStandings[category].push({ name, ends: parseFloat(ends), pts: parseFloat(pts) });
-                }
+                let category = pos.includes("Skip") ? "Skip" : (pos.includes("Vice") || pos.includes("Third") ? "Vice" : (pos.includes("Second") ? "Second" : (pos.includes("Lead") ? "Lead" : "")));
+                if (category) allStandings[category].push({ name, ends: parseFloat(ends), pts: parseFloat(pts) });
             });
-
-            Object.keys(allStandings).forEach(pos => {
-                allStandings[pos].sort((a, b) => b.pts !== a.pts ? b.pts - a.pts : b.ends - a.ends);
-            });
+            Object.keys(allStandings).forEach(pos => allStandings[pos].sort((a, b) => b.pts !== a.pts ? b.pts - a.pts : b.ends - a.ends));
         }
 
         function processSchedule(rows) {
             allGames = {};
             highestCompletedRound = 0;
-
             for (let i = 1; i < rows.length; i++) {
                 const row = rows[i];
                 if (!row || row.length < 5) continue;
-
-                const date = (row[0] || "").trim();
-                const roundStr = (row[1] || "").trim();
-                const gameNumStr = (row[2] || "").trim();
-                const sheetRaw = (row[3] || "").trim();
-                const skip = (row[4] || "").trim();
-                const vice = (row[5] || "").trim();
-                const second = (row[6] || "").trim();
-                const lead = (row[7] || "").trim();
-                const score = (row[8] || "").trim();
-                const endsWon = (row[9] || "").trim();
-                const result = (row[10] || "").trim();
-
+                const [date, roundStr, gameNumStr, sheetRaw, skip, vice, second, lead, score, endsWon, result] = row;
                 const round = parseInt(roundStr);
                 const gameNum = parseInt(gameNumStr);
-
                 if (!date || date.toLowerCase() === "date" || !sheetRaw) continue;
-
                 if (!allGames[date]) allGames[date] = {};
                 const sheetId = sheetRaw.toLowerCase().replace("sheet", "").trim();
-
-                if (!allGames[date][sheetId]) {
-                    allGames[date][sheetId] = { 
-                        sheetDisplay: sheetRaw, 
-                        round, 
-                        gameNum, 
-                        teams: [] 
-                    };
-                }
+                if (!allGames[date][sheetId]) allGames[date][sheetId] = { sheetDisplay: sheetRaw, round, gameNum, teams: [] };
                 allGames[date][sheetId].teams.push({ skip, vice, second, lead, score, endsWon, result });
-
-                if (gameNum === 4 && result && result !== "") {
-                    if (round > highestCompletedRound) highestCompletedRound = round;
-                }
+                if (gameNum === 4 && result && result !== "" && round > highestCompletedRound) highestCompletedRound = round;
             }
-
-            const dateSelect = document.getElementById('date-select');
             const dates = Object.keys(allGames).sort((a, b) => new Date(a) - new Date(b));
-            
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            
-            let defaultDate = dates.length > 0 ? dates[0] : "";
-            
-            for (const dateStr of dates) {
-                const d = new Date(dateStr);
-                if (d >= today) {
-                    defaultDate = dateStr;
-                    break;
-                }
-            }
-
-            dateSelect.innerHTML = dates.map(d => `<option value="${d}" ${d === defaultDate ? 'selected' : ''}>${d}</option>`).join('');
-            filterScheduleByDate(defaultDate || dates[0]);
-        }
-
-        function getTeamHtml(team, isRight = false) {
-            if (!team || !team.skip) return `<div class="flex-1 text-center text-slate-400 font-bold italic py-4 text-lg">BYE</div>`;
-            const isCompleted = team.result && team.result !== "";
-            const resultColor = team.result === "W" ? "text-green-600" : (team.result === "L" ? "text-red-600" : "text-gray-500");
-
-            return `
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2 ${isRight ? 'flex-row-reverse' : 'flex-row'}">
-                        <div class="font-black text-[#a63a2a] text-[16px] sm:text-[18px] uppercase leading-tight tracking-tight break-words">${team.skip}</div>
-                        ${isCompleted ? `<span class="text-[10px] font-black ${resultColor} shrink-0">[${team.result}]</span>` : ''}
-                    </div>
-                    ${isCompleted ? `
-                        <div class="mt-1 bg-[#f4eee1] py-1 px-2 rounded border border-[#d9c5a0] inline-block">
-                             <div class="text-[14px] font-black text-[#2d3e50] leading-none">
-                                ${team.score} <span class="text-[8px] font-bold text-[#735338] ml-1 uppercase">PTS</span> 
-                                <span class="mx-1 opacity-30">|</span> 
-                                ${team.endsWon} <span class="text-[8px] font-bold text-[#735338] ml-1 uppercase">ENDS</span>
-                             </div>
-                        </div>
-                    ` : ''}
-                    <div class="text-[10px] text-[#2d3e50] leading-snug mt-3 space-y-1 font-bold uppercase ${isRight ? 'text-left' : 'text-right'} opacity-80">
-                        <div class="break-words"><span class="font-black text-[#a63a2a]">V:</span> ${team.vice || '-'}</div>
-                        <div class="break-words"><span class="font-black text-[#a63a2a]">2:</span> ${team.second || '-'}</div>
-                        <div class="break-words"><span class="font-black text-[#a63a2a]">L:</span> ${team.lead || '-'}</div>
-                    </div>
-                </div>
-            `;
+            const today = new Date().setHours(0,0,0,0);
+            const defaultDate = dates.find(d => new Date(d) >= today) || dates[0];
+            document.getElementById('date-select').innerHTML = dates.map(d => `<option value="${d}" ${d === defaultDate ? 'selected' : ''}>${d}</option>`).join('');
+            filterScheduleByDate(defaultDate);
         }
 
         function filterScheduleByDate(date) {
@@ -390,131 +284,82 @@
             const banner = document.getElementById('round-banner');
             const roundText = document.getElementById('round-text');
             const dateGames = allGames[date];
-            
-            if (!dateGames) {
-                list.innerHTML = `<div class="col-span-full text-center p-10 text-[#735338] uppercase font-bold text-xs italic">No data.</div>`;
-                return;
-            }
-
+            if (!dateGames) return;
             const sheetKeys = Object.keys(dateGames).sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0));
             const first = dateGames[sheetKeys[0]];
-            const currentRound = first.round;
-
             roundText.innerText = `Round ${first.round} • Game ${first.gameNum}`;
             banner.classList.remove('hidden');
-
-            const isAccessible = currentRound === 1 || currentRound <= (highestCompletedRound + 1);
-
-            if (!isAccessible) {
-                list.innerHTML = `
-                    <div class="col-span-full flex flex-col items-center justify-center p-12 text-center space-y-4 bg-white/50 rounded-xl border-2 border-dashed border-[#d9c5a0]">
-                        <div class="w-16 h-16 bg-[#d9c5a0]/20 rounded-full flex items-center justify-center text-[#735338]">
-                            <i class="fa-solid fa-lock text-2xl"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-black text-[#2d3e50] uppercase tracking-widest text-sm">Round ${currentRound} Locked</h3>
-                            <p class="text-[10px] font-bold text-[#735338] uppercase mt-2 leading-relaxed">
-                                Schedule data will be revealed once Game 4 of Round ${currentRound - 1} is finalized.
-                            </p>
-                        </div>
-                    </div>
-                `;
+            
+            if (first.round > 1 && first.round > (highestCompletedRound + 1)) {
+                list.innerHTML = `<div class="col-span-full text-center p-8 opacity-50 font-black uppercase text-[10px]">Round Locked</div>`;
                 return;
             }
 
             list.innerHTML = sheetKeys.map(sId => {
                 const game = dateGames[sId];
-                const team1 = game.teams[0];
-                const team2 = game.teams[1];
-                let label = game.sheetDisplay;
-                if (!label.toLowerCase().includes("sheet")) label = "Sheet " + label;
-
                 return `
-                    <div class="glass-card rounded-lg overflow-hidden border-2 border-[#d9c5a0] flex flex-col">
-                        <div class="bg-[#f4eee1] px-4 py-2 border-b-2 border-[#d9c5a0] text-center">
-                            <span class="text-xs font-black text-[#735338] uppercase tracking-[0.2em]">${label.toUpperCase()}</span>
+                    <div class="glass-card rounded border border-[#d9c5a0] overflow-hidden">
+                        <div class="bg-[#f4eee1] px-2 py-1 border-b border-[#d9c5a0] text-center">
+                            <span class="text-[9px] font-black text-[#735338] uppercase tracking-widest">${game.sheetDisplay}</span>
                         </div>
-                        <div class="p-4 flex items-start gap-3 bg-white flex-1">
-                            <div class="w-[45%] text-right">${getTeamHtml(team1, false)}</div>
-                            <div class="w-[10%] pt-4 text-[9px] font-black text-[#d9c5a0] italic text-center shrink-0">VS</div>
-                            <div class="w-[45%] text-left">${getTeamHtml(team2, true)}</div>
+                        <div class="p-3 flex items-center justify-between gap-4">
+                            ${renderTeam(game.teams[0], false)}
+                            <div class="text-[8px] font-black text-[#d9c5a0] italic">VS</div>
+                            ${renderTeam(game.teams[1], true)}
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }).join('');
         }
 
+        function renderTeam(team, isRight) {
+            if (!team || !team.skip) return `<div class="flex-1 text-[10px] opacity-40 italic">BYE</div>`;
+            const resColor = team.result === "W" ? "text-green-600" : (team.result === "L" ? "text-red-600" : "text-gray-400");
+            return `
+                <div class="flex-1 min-w-0 ${isRight ? 'text-left' : 'text-right'}">
+                    <div class="font-black text-[#a63a2a] text-xs sm:text-sm uppercase leading-tight truncate">${team.skip}</div>
+                    ${team.result ? `<div class="text-[9px] font-black ${resColor} mt-0.5">${team.score} PTS | ${team.endsWon} ENDS</div>` : ''}
+                </div>`;
+        }
+
         function filterStandings(pos) {
-            document.querySelectorAll('.pos-tab').forEach(btn => {
-                btn.classList.remove('bg-[#2d3e50]', 'text-white', 'border-[#1a252f]');
-                btn.classList.add('bg-white', 'text-[#735338]', 'border-[#d9c5a0]');
+            document.querySelectorAll('.pos-tab').forEach(b => {
+                b.classList.remove('bg-[#2d3e50]', 'text-white');
+                b.classList.add('bg-white', 'text-[#735338]');
             });
-            const activeBtn = document.getElementById(`btn-${pos}`);
-            if (activeBtn) {
-                activeBtn.classList.add('bg-[#2d3e50]', 'text-white', 'border-[#1a252f]');
-                activeBtn.classList.remove('bg-white', 'text-[#735338]', 'border-[#d9c5a0]');
-            }
+            const btn = document.getElementById(`btn-${pos}`);
+            btn.classList.add('bg-[#2d3e50]', 'text-white');
+            btn.classList.remove('bg-white', 'text-[#735338]');
 
             const list = document.getElementById('standings-list');
             const players = allStandings[pos] || [];
-            const totalCount = players.length;
-            
             list.innerHTML = players.map((p, idx) => {
                 const isTop = idx < 4;
-                const isBottom = idx >= totalCount - 4 && totalCount > 4;
-                let ribbonHtml = isTop ? `<div class="ribbon-container"><div class="ribbon-shape ribbon-a"><span class="ribbon-text">A</span></div></div>` : (isBottom ? `<div class="ribbon-container"><div class="ribbon-shape ribbon-b"><span class="ribbon-text">B</span></div></div>` : '');
-
+                const isBottom = idx >= players.length - 4 && players.length > 4;
+                let ribbon = isTop ? `<div class="ribbon-container"><div class="ribbon-shape ribbon-a"><span class="ribbon-text">A</span></div></div>` : (isBottom ? `<div class="ribbon-container"><div class="ribbon-shape ribbon-b"><span class="ribbon-text">B</span></div></div>` : '');
                 return `
-                    <div class="bg-white rounded-lg border-2 border-[#d9c5a0] p-4 flex items-center justify-between shadow-sm relative overflow-hidden transition-all hover:border-[#a63a2a]">
-                        ${ribbonHtml}
-                        <div class="flex items-center gap-4 relative">
-                            <div class="w-9 h-9 flex items-center justify-center rounded bg-[#f4eee1] border border-[#d9c5a0] text-sm font-black text-[#a63a2a] shadow-inner">
-                                ${idx + 1}
-                            </div>
-                            <div class="font-black text-[#2d3e50] uppercase tracking-tight text-base sm:text-lg break-words leading-tight">${p.name}</div>
+                    <div class="bg-white rounded border border-[#d9c5a0] p-2 flex items-center justify-between relative overflow-hidden shadow-sm">
+                        ${ribbon}
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 flex items-center justify-center bg-[#f4eee1] rounded text-[10px] font-black text-[#a63a2a]">${idx + 1}</span>
+                            <span class="font-black text-[#2d3e50] uppercase text-[11px] truncate max-w-[100px]">${p.name}</span>
                         </div>
-                        <div class="flex text-right relative items-end pr-10">
-                            <div class="opacity-60 w-12 mr-2 sm:mr-4">
-                                <div class="text-[7px] uppercase font-black text-[#735338] tracking-widest leading-none mb-1">Ends</div>
-                                <div class="text-sm font-bold text-[#2d3e50] leading-none">${p.ends}</div>
-                            </div>
-                            <div class="w-12">
-                                <div class="text-[8px] uppercase font-black text-[#735338] tracking-widest leading-none mb-1">Points</div>
-                                <div class="text-2xl font-black text-[#a63a2a] leading-none">${p.pts}</div>
-                            </div>
+                        <div class="flex items-baseline gap-2 pr-6">
+                            <span class="text-[8px] font-bold opacity-40 uppercase">Pts</span>
+                            <span class="text-base font-black text-[#a63a2a]">${p.pts}</span>
                         </div>
                     </div>`;
             }).join('');
         }
 
         function switchTab(tab) {
-            const schView = document.getElementById('schedule-view');
-            const stdView = document.getElementById('standings-view');
-            const infoView = document.getElementById('info-view');
-            const tSch = document.getElementById('tab-schedule');
-            const tStd = document.getElementById('tab-standings');
-            const tInfo = document.getElementById('tab-info');
-
-            schView.classList.add('hidden');
-            stdView.classList.add('hidden');
-            infoView.classList.add('hidden');
-            [tSch, tStd, tInfo].forEach(t => { t.classList.remove('active-tab'); t.classList.add('text-[#d9c5a0]'); });
-
-            if (tab === 'schedule') {
-                schView.classList.remove('hidden');
-                tSch.classList.add('active-tab');
-                tSch.classList.remove('text-[#d9c5a0]');
-            } else if (tab === 'standings') {
-                stdView.classList.remove('hidden');
-                tStd.classList.add('active-tab');
-                tStd.classList.remove('text-[#d9c5a0]');
-                filterStandings('Skip');
-            } else if (tab === 'info') {
-                infoView.classList.remove('hidden');
-                tInfo.classList.add('active-tab');
-                tInfo.classList.remove('text-[#d9c5a0]');
-            }
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            ['schedule', 'standings', 'info'].forEach(t => {
+                document.getElementById(`${t}-view`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).classList.remove('active-tab');
+            });
+            document.getElementById(`${tab}-view`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).classList.add('active-tab');
+            if (tab === 'standings') filterStandings('Skip');
+            window.scrollTo(0,0);
         }
 
         loadAppData();
