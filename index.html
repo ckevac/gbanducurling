@@ -101,12 +101,6 @@
             font-size: 12px;
             line-height: 1;
         }
-
-        /* Locked state styling */
-        .locked-overlay {
-            background: rgba(244, 238, 225, 0.9);
-            backdrop-filter: blur(2px);
-        }
     </style>
     <!-- iOS Web App Support -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -114,7 +108,7 @@
     <meta name="apple-mobile-web-app-title" content="GBU Curling">
     <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/10gkXR4l-Mifhhz2hevWdFM8TZiqoIe52">
 </head>
-<body class="min-h-screen pb-24 font-sans">
+<body class="min-h-screen pb-24 font-sans text-sm">
 
     <!-- Announcement Banner -->
     <div class="bg-[#a63a2a] text-white py-2 overflow-hidden border-b-2 border-black sticky top-0 z-[60]">
@@ -181,16 +175,47 @@
         </div>
 
         <!-- Information View -->
-        <div id="info-view" class="hidden view-info p-6 space-y-8">
+        <div id="info-view" class="hidden view-info p-6 space-y-10">
             <section>
                 <h3 class="text-lg font-black uppercase tracking-widest text-[#a63a2a] border-b-2 border-[#d9c5a0] pb-2 mb-4">League Details</h3>
                 <div class="space-y-4 text-sm leading-relaxed text-[#2d3e50] font-medium">
                     <p>The league plays out of the <span class="font-black text-[#735338]">Whitby Curling Club</span> every Monday from <span class="font-black italic">4:30 - 6:30 PM</span> from October - April.</p>
                     <p>Members of the league consist of men from Durham and surrounding regions.</p>
-                    <div class="bg-[#f4eee1] p-4 rounded-lg border-l-4 border-[#a63a2a]">
-                        <p class="text-xs font-black uppercase tracking-widest text-[#735338] mb-1">Inquiries & Membership</p>
-                        <a href="mailto:gbanducurling@gmail.com" class="text-sm font-black text-[#a63a2a] break-all hover:underline">gbanducurling@gmail.com</a>
+                </div>
+            </section>
+
+            <section>
+                <h3 class="text-lg font-black uppercase tracking-widest text-[#a63a2a] border-b-2 border-[#d9c5a0] pb-2 mb-4">Absences & Spares</h3>
+                <div class="space-y-6 text-sm leading-relaxed text-[#2d3e50] font-medium">
+                    <p class="italic text-xs text-[#735338] font-bold">If you are going to be away or missing any games, take the following steps ASAP in the order listed (Jeff’s contact info has been provided via weekly communications):</p>
+                    
+                    <div class="space-y-4">
+                        <div class="flex gap-4 items-start">
+                            <div class="w-6 h-6 rounded bg-[#2d3e50] text-white flex-shrink-0 flex items-center justify-center font-black text-xs">1</div>
+                            <p>Send a <span class="font-black text-[#a63a2a] uppercase">Text</span> message to <span class="font-black">Jeff Sisson</span> and include your name and game date(s) you can’t make.</p>
+                        </div>
+                        <div class="flex gap-4 items-start">
+                            <div class="w-6 h-6 rounded bg-[#2d3e50] text-white flex-shrink-0 flex items-center justify-center font-black text-xs">2</div>
+                            <p>If you don’t have a cell phone, send an <span class="font-black text-[#a63a2a] uppercase">Email</span> to <span class="font-black">Jeff</span> with your name and game date(s) you can’t make.</p>
+                        </div>
+                        <div class="flex gap-4 items-start">
+                            <div class="w-6 h-6 rounded bg-[#2d3e50] text-white flex-shrink-0 flex items-center justify-center font-black text-xs">3</div>
+                            <p>If you are unable to text or email, then <span class="font-black text-[#a63a2a] uppercase">Call Jeff</span> and leave a voice message with your name and game date(s) you can't make.</p>
+                        </div>
                     </div>
+
+                    <div class="bg-[#f4eee1] p-4 border-l-4 border-[#d9c5a0] text-xs">
+                        <p>As Jeff becomes aware that spares are needed, he will contact the available spares and do his best to fill the vacancies as efficiently and effectively as possible.</p>
+                        <p class="mt-3">In the very rare event that we are unable to fill all spots with spares, we will move players from other teams so that no team has less than 3 players and no games are left unplayed.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h3 class="text-lg font-black uppercase tracking-widest text-[#a63a2a] border-b-2 border-[#d9c5a0] pb-2 mb-4">Inquiries</h3>
+                <div class="bg-[#f4eee1] p-5 rounded-lg border-2 border-[#d9c5a0] flex flex-col items-center text-center">
+                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-[#735338] mb-2">Membership & General Info</p>
+                    <a href="mailto:gbanducurling@gmail.com" class="text-base font-black text-[#a63a2a] hover:underline decoration-2">gbanducurling@gmail.com</a>
                 </div>
             </section>
         </div>
@@ -299,7 +324,6 @@
                 }
                 allGames[date][sheetId].teams.push({ skip, vice, second, lead, score, endsWon, result });
 
-                // Check if Game 4 of this round is completed
                 if (gameNum === 4 && result && result !== "") {
                     if (round > highestCompletedRound) highestCompletedRound = round;
                 }
@@ -372,7 +396,6 @@
             roundText.innerText = `Round ${first.round} • Game ${first.gameNum}`;
             banner.classList.remove('hidden');
 
-            // Logic: A round is accessible if it's Round 1, OR if the previous round is fully completed
             const isAccessible = currentRound === 1 || currentRound <= (highestCompletedRound + 1);
 
             if (!isAccessible) {
