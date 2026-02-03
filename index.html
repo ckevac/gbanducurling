@@ -313,9 +313,9 @@
                         <div class="bg-[#f4eee1] px-2 py-1 border-b border-[#d9c5a0] text-center">
                             <span class="text-[9px] font-black text-[#735338] uppercase tracking-widest">${game.sheetDisplay}</span>
                         </div>
-                        <div class="p-3 flex items-center justify-between gap-4">
+                        <div class="p-3 flex items-start justify-between gap-4">
                             ${renderTeam(game.teams[0], false)}
-                            <div class="text-[8px] font-black text-[#d9c5a0] italic">VS</div>
+                            <div class="text-[8px] font-black text-[#d9c5a0] italic mt-2">VS</div>
                             ${renderTeam(game.teams[1], true)}
                         </div>
                     </div>`;
@@ -328,8 +328,13 @@
             const resultLabel = team.result ? `[${team.result}]` : '';
             return `
                 <div class="flex-1 min-w-0 ${isRight ? 'text-left' : 'text-right'}">
-                    <div class="font-black text-[#a63a2a] text-xs sm:text-sm uppercase leading-tight truncate">${team.skip}</div>
-                    ${team.result ? `<div class="text-[9px] font-black ${resColor} mt-0.5">${resultLabel} ${team.score} PTS | ${team.endsWon} ENDS</div>` : ''}
+                    <div class="font-black text-[#a63a2a] text-xs sm:text-sm uppercase leading-tight truncate mb-1">${team.skip}</div>
+                    <div class="space-y-0.5">
+                        <div class="text-[7px] text-[#735338] font-bold uppercase opacity-80 leading-none">V: ${team.vice || ''}</div>
+                        <div class="text-[7px] text-[#735338] font-bold uppercase opacity-80 leading-none">S: ${team.second || ''}</div>
+                        <div class="text-[7px] text-[#735338] font-bold uppercase opacity-80 leading-none">L: ${team.lead || ''}</div>
+                    </div>
+                    ${team.result ? `<div class="text-[9px] font-black ${resColor} mt-2">${resultLabel} ${team.score} PTS | ${team.endsWon} ENDS</div>` : ''}
                 </div>`;
         }
 
