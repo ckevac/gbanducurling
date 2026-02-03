@@ -9,7 +9,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/dots/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --vintage-tan: #d9c5a0;
@@ -308,10 +308,12 @@
 
             list.innerHTML = sheetKeys.map(sId => {
                 const game = dateGames[sId];
+                // Ensure "Sheet" prefix is included
+                const sheetLabel = game.sheetDisplay.toLowerCase().includes('sheet') ? game.sheetDisplay : `Sheet ${game.sheetDisplay}`;
                 return `
                     <div class="glass-card rounded border border-[#d9c5a0] overflow-hidden">
                         <div class="bg-[#f4eee1] px-2 py-1 border-b border-[#d9c5a0] text-center">
-                            <span class="text-[9px] font-black text-[#735338] uppercase tracking-widest">${game.sheetDisplay}</span>
+                            <span class="text-[9px] font-black text-[#735338] uppercase tracking-widest">${sheetLabel}</span>
                         </div>
                         <div class="p-3 flex items-start justify-between gap-4">
                             ${renderTeam(game.teams[0], false)}
@@ -324,7 +326,7 @@
 
         function renderTeam(team, isRight) {
             if (!team || !team.skip) return `<div class="flex-1 text-[10px] opacity-40 italic">BYE</div>`;
-            const resColor = team.result === "W" ? "text-green-600" : (team.result === "L" ? "text-red-600" : "text-gray-400");
+            const resColor = team.result === "W" ? "text-green-700" : (team.result === "L" ? "text-red-700" : "text-gray-500");
             const resultLabel = team.result ? `[${team.result}]` : '';
             return `
                 <div class="flex-1 min-w-0 ${isRight ? 'text-left' : 'text-right'}">
@@ -334,7 +336,7 @@
                         <div class="text-[7px] text-[#735338] font-bold uppercase opacity-80 leading-none">S: ${team.second || ''}</div>
                         <div class="text-[7px] text-[#735338] font-bold uppercase opacity-80 leading-none">L: ${team.lead || ''}</div>
                     </div>
-                    ${team.result ? `<div class="text-[9px] font-black ${resColor} mt-2">${resultLabel} ${team.score} PTS | ${team.endsWon} ENDS</div>` : ''}
+                    ${team.result ? `<div class="text-[10px] font-black ${resColor} mt-2 uppercase tracking-tight">${resultLabel} ${team.score} PTS | ${team.endsWon} ENDS</div>` : ''}
                 </div>`;
         }
 
