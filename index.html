@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <title>The Good, the Bad, and the Ugly Curling League</title>
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="https://lh3.googleusercontent.com/u/0/d/10gkXR4l-Mifhhz2hevWdFM8TZiqoIe52">
@@ -73,7 +74,7 @@
         .animate-marquee {
             display: inline-block;
             white-space: nowrap;
-            animation: marquee 20s linear infinite;
+            animation: marquee 25s linear infinite;
         }
         
         .view-schedule, .view-standings, .view-info { 
@@ -109,7 +110,6 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Admin Styles */
         #admin-panel {
             background: var(--bandit-navy);
             border: 2px solid var(--vintage-tan);
@@ -125,40 +125,35 @@
 <body class="min-h-screen pb-12 font-sans text-sm">
 
     <!-- Announcement Banner -->
-    <div id="banner-container" class="announcement-banner bg-[#a63a2a] text-white py-2 overflow-hidden border-b-2 border-black sticky top-0 z-[60]">
+    <div id="banner-container" class="announcement-banner bg-[#a63a2a] text-white py-2 overflow-hidden border-b-2 border-black sticky top-0 z-[60]" style="display: none;">
         <div id="marquee-text" class="animate-marquee font-black uppercase tracking-widest text-[10px] sm:text-sm">
-            🚨 NO CURLING ON FEBRUARY 16 • NO CURLING ON FEBRUARY 16 • NO CURLING ON FEBRUARY 16 • NO CURLING ON FEBRUARY 16 • NO CURLING ON FEBRUARY 16 🚨
+            🚨 INITIALIZING... 🚨
         </div>
     </div>
 
-    <!-- Admin Panel (Hidden) -->
+    <!-- Admin Panel -->
     <div id="admin-panel" class="hidden fixed bottom-4 right-4 z-[100] w-72 rounded-lg p-4 text-white">
         <div class="flex justify-between items-center mb-4 border-b border-white/20 pb-2">
             <h3 class="font-black uppercase tracking-widest text-xs flex items-center gap-2">
-                <i class="fas fa-user-shield text-[#d9c5a0]"></i> Admin Controls
+                <i class="fas fa-user-shield text-[#d9c5a0]"></i> Admin Info
             </h3>
             <button onclick="toggleAdminPanel()" class="text-white/50 hover:text-white"><i class="fas fa-times"></i></button>
         </div>
         <div class="space-y-4">
-            <div>
-                <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" id="admin-banner-toggle" onchange="updateBannerVisibility()" class="w-4 h-4 rounded accent-[#a63a2a]">
-                    <span class="text-[10px] font-bold uppercase">Show Scroll Banner</span>
-                </label>
+            <p class="text-[10px] uppercase font-bold leading-relaxed">
+                Banner control is live from "App Banner" sheet tab!
+            </p>
+            <div class="bg-black/20 p-2 rounded text-[9px] space-y-2 italic">
+                <p>A1: Checkbox (Visible)</p>
+                <p>A2: Your Message</p>
             </div>
-            <div>
-                <label class="block text-[9px] font-bold uppercase mb-1 opacity-70">Banner Message</label>
-                <textarea id="admin-banner-input" rows="3" class="w-full bg-black/30 border border-white/20 rounded p-2 text-[10px] outline-none focus:border-[#d9c5a0]" placeholder="Enter announcement text..."></textarea>
-                <button onclick="updateBannerText()" class="w-full mt-2 bg-[#d9c5a0] text-[#2d3e50] font-black uppercase py-2 rounded text-[10px] hover:bg-white transition-colors">Update Text</button>
-            </div>
-            <p class="text-[8px] italic opacity-50 text-center">Changes saved to local storage.</p>
+            <p class="text-[8px] italic opacity-50 text-center">Note: Google Pub-to-Web can take 2-5 mins to update.</p>
         </div>
     </div>
 
     <!-- Header -->
-    <header class="header-gradient text-white shadow-xl sticky top-[28px] sm:top-[36px] z-50 sticky-nav-offset">
+    <header class="header-gradient text-white shadow-xl sticky top-[0px] z-50 sticky-nav-offset">
         <div class="main-header-content max-w-5xl mx-auto px-4 py-4 sm:py-8 flex flex-row items-center justify-center gap-4 sm:gap-12">
-            <!-- Secret Trigger: 5 Clicks on Logo -->
             <div onclick="handleLogoClick()" class="logo-container cursor-pointer w-20 h-20 sm:w-40 sm:h-40 rounded-full border-2 sm:border-8 border-[#d9c5a0] overflow-hidden bg-white shadow-2xl flex-shrink-0 active:scale-95 transition-transform">
                 <img id="league-logo" 
                      src="https://lh3.googleusercontent.com/u/0/d/10gkXR4l-Mifhhz2hevWdFM8TZiqoIe52" 
@@ -249,6 +244,7 @@
     <script>
         const SCHEDULE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQz2JZi041jr2rlFvlOzMT-q_eD2JwHqgsAWNOtc07pzCH89pxV15O-HmNLz_gXDQ2CXjBFQPgbAcU2/pub?gid=2053038258&single=true&output=csv";
         const STANDINGS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQz2JZi041jr2rlFvlOzMT-q_eD2JwHqgsAWNOtc07pzCH89pxV15O-HmNLz_gXDQ2CXjBFQPgbAcU2/pub?gid=1570496540&single=true&output=csv";
+        const BANNER_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQz2JZi041jr2rlFvlOzMT-q_eD2JwHqgsAWNOtc07pzCH89pxV15O-HmNLz_gXDQ2CXjBFQPgbAcU2/pub?gid=2074558277&single=true&output=csv";
 
         let allGames = {};
         let allStandings = { Skip: [], Vice: [], Second: [], Lead: [] };
@@ -256,7 +252,23 @@
         let logoClicks = 0;
         let clickTimer;
 
-        // --- Admin Logic ---
+        async function fetchWithRetry(url, retries = 3, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, { 
+                        method: 'GET',
+                        cache: 'no-store',
+                        // Removing explicit referrer policy to allow browser defaults
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return await response.text();
+                } catch (e) {
+                    if (i === retries - 1) throw e;
+                    await new Promise(res => setTimeout(res, delay));
+                    delay *= 2; 
+                }
+            }
+        }
 
         function handleLogoClick() {
             logoClicks++;
@@ -274,34 +286,59 @@
             panel.classList.toggle('hidden');
         }
 
-        function initAdminControls() {
-            const savedText = localStorage.getItem('gbu_banner_text') || '🚨 NO CURLING ON FEBRUARY 16 • NO CURLING ON FEBRUARY 16 • NO CURLING ON FEBRUARY 16 • NO CURLING ON FEBRUARY 16 • NO CURLING ON FEBRUARY 16 🚨';
-            const savedVisible = localStorage.getItem('gbu_banner_visible') !== 'false'; // Default to true
+        async function initBanner() {
+            try {
+                // If banner fetch fails, we just don't show it. We don't want to crash the app.
+                const csvData = await fetchWithRetry(BANNER_URL).catch(() => null);
+                if (!csvData) {
+                    hideBannerUI();
+                    return;
+                }
 
-            const marquee = document.getElementById('marquee-text');
+                const rows = Papa.parse(csvData, { header: false, skipEmptyLines: false }).data;
+                if (!rows || rows.length === 0) {
+                    hideBannerUI();
+                    return;
+                }
+
+                const rawA1 = (rows[0] && rows[0][0]) ? rows[0][0].toString().trim() : "";
+                const valA1 = rawA1.toUpperCase();
+                
+                const isVisible = (
+                    valA1 === 'TRUE' || 
+                    valA1 === '1' || 
+                    valA1 === 'YES' || 
+                    valA1 === 'ON' || 
+                    valA1 === '☑' || 
+                    valA1 === 'CHECKED'
+                );
+                
+                const bannerText = (rows[1] && rows[1][0]) ? rows[1][0].trim() : "";
+
+                const marquee = document.getElementById('marquee-text');
+                const container = document.getElementById('banner-container');
+                const header = document.querySelector('header');
+
+                if (isVisible && bannerText !== "") {
+                    marquee.innerHTML = `🚨 ${bannerText} 🚨`;
+                    container.style.display = 'block';
+                    header.style.top = (window.innerWidth < 640 ? '28px' : '36px');
+                } else {
+                    hideBannerUI();
+                }
+
+            } catch (e) {
+                console.warn("Banner failed to load, suppressing error:", e);
+                hideBannerUI();
+            }
+        }
+
+        function hideBannerUI() {
             const container = document.getElementById('banner-container');
-            const input = document.getElementById('admin-banner-input');
-            const toggle = document.getElementById('admin-banner-toggle');
-
-            marquee.innerHTML = `${savedText}`;
-            input.value = savedText;
-            toggle.checked = savedVisible;
-            container.style.display = savedVisible ? 'block' : 'none';
+            const header = document.querySelector('header');
+            if (container) container.style.display = 'none';
+            if (header) header.style.top = '0px';
         }
-
-        function updateBannerText() {
-            const newText = document.getElementById('admin-banner-input').value;
-            localStorage.setItem('gbu_banner_text', newText);
-            document.getElementById('marquee-text').innerHTML = newText;
-        }
-
-        function updateBannerVisibility() {
-            const isVisible = document.getElementById('admin-banner-toggle').checked;
-            localStorage.setItem('gbu_banner_visible', isVisible);
-            document.getElementById('banner-container').style.display = isVisible ? 'block' : 'none';
-        }
-
-        // --- Core App Logic ---
 
         function handleLogoError(img) {
             img.src = 'https://placehold.co/200x200/2d3e50/d9c5a0?text=GBU';
@@ -309,9 +346,10 @@
 
         async function loadAppData() {
             try {
+                // Try to load core data first
                 const [schRaw, stdRaw] = await Promise.all([
-                    fetch(SCHEDULE_URL).then(r => r.text()),
-                    fetch(STANDINGS_URL).then(r => r.text())
+                    fetchWithRetry(SCHEDULE_URL),
+                    fetchWithRetry(STANDINGS_URL)
                 ]);
 
                 processStandings(Papa.parse(stdRaw, { header: true, skipEmptyLines: true }).data);
@@ -319,9 +357,18 @@
 
                 document.getElementById('loading').classList.add('hidden');
                 document.getElementById('schedule-view').classList.remove('hidden');
-                initAdminControls();
+                
+                // Initialize banner asynchronously so it doesn't block UI readiness
+                initBanner();
+
             } catch (e) {
-                document.getElementById('loading').innerHTML = `<div class="text-red-800 text-center p-10 font-black uppercase italic">Error Loading Data.</div>`;
+                console.error("Critical app load failure:", e);
+                document.getElementById('loading').innerHTML = `
+                    <div class="text-red-800 text-center p-10 font-black uppercase italic space-y-4">
+                        <p>Connection Error</p>
+                        <p class="text-[10px] normal-case opacity-60">Data retrieval failed. Please check your internet connection and ensure Google Sheets is accessible.</p>
+                        <button onclick="location.reload()" class="bg-[#a63a2a] text-white px-4 py-2 rounded text-[10px] mt-4 shadow-lg active:translate-y-0.5">Retry Connection</button>
+                    </div>`;
             }
         }
 
@@ -364,8 +411,12 @@
             const dates = Object.keys(allGames).sort((a, b) => new Date(a) - new Date(b));
             const today = new Date().setHours(0,0,0,0);
             const defaultDate = dates.find(d => new Date(d) >= today) || dates[0];
-            document.getElementById('date-select').innerHTML = dates.map(d => `<option value="${d}" ${d === defaultDate ? 'selected' : ''}>${d}</option>`).join('');
-            filterScheduleByDate(defaultDate);
+            
+            const select = document.getElementById('date-select');
+            if (select) {
+                select.innerHTML = dates.map(d => `<option value="${d}" ${d === defaultDate ? 'selected' : ''}>${d}</option>`).join('');
+                filterScheduleByDate(defaultDate);
+            }
         }
 
         function filterScheduleByDate(date) {
@@ -373,11 +424,12 @@
             const banner = document.getElementById('round-banner');
             const roundText = document.getElementById('round-text');
             const dateGames = allGames[date];
-            if (!dateGames) return;
+            if (!dateGames || !list) return;
             const sheetKeys = Object.keys(dateGames).sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0));
             const first = dateGames[sheetKeys[0]];
-            roundText.innerText = `Round ${first.round} • Game ${first.gameNum}`;
-            banner.classList.remove('hidden');
+            
+            if (roundText) roundText.innerText = `Round ${first.round} • Game ${first.gameNum}`;
+            if (banner) banner.classList.remove('hidden');
             
             if (first.round > 1 && first.round > (highestCompletedRound + 1)) {
                 list.innerHTML = `<div class="col-span-full text-center p-8 opacity-50 font-black uppercase text-[10px]">Round Locked</div>`;
@@ -408,18 +460,10 @@
             let resColorClass = "text-gray-500";
             const normalizedResult = (team.result || "").toUpperCase();
             
-            if (normalizedResult === "W") {
-                resText = "WIN";
-                resColorClass = "text-green-700";
-            } else if (normalizedResult === "L") {
-                resText = "LOSS";
-                resColorClass = "text-red-700";
-            } else if (normalizedResult === "T") {
-                resText = "TIE";
-                resColorClass = "text-black";
-            } else {
-                resText = normalizedResult;
-            }
+            if (normalizedResult === "W") { resText = "WIN"; resColorClass = "text-green-700"; }
+            else if (normalizedResult === "L") { resText = "LOSS"; resColorClass = "text-red-700"; }
+            else if (normalizedResult === "T") { resText = "TIE"; resColorClass = "text-black"; }
+            else { resText = normalizedResult; }
 
             return `
                 <div class="flex-1 min-w-0 ${isRight ? 'text-left' : 'text-right'}">
@@ -446,10 +490,13 @@
                 b.classList.add('bg-white', 'text-[#735338]');
             });
             const btn = document.getElementById(`btn-${pos}`);
-            btn.classList.add('bg-[#2d3e50]', 'text-white');
-            btn.classList.remove('bg-white', 'text-[#735338]');
+            if (btn) {
+                btn.classList.add('bg-[#2d3e50]', 'text-white');
+                btn.classList.remove('bg-white', 'text-[#735338]');
+            }
 
             const list = document.getElementById('standings-list');
+            if (!list) return;
             const players = allStandings[pos] || [];
             list.innerHTML = players.map((p, idx) => {
                 const isTop = idx < 4;
@@ -478,16 +525,21 @@
 
         function switchTab(tab) {
             ['schedule', 'standings', 'info'].forEach(t => {
-                document.getElementById(`${t}-view`).classList.add('hidden');
-                document.getElementById(`tab-${t}`).classList.remove('active-tab');
+                const view = document.getElementById(`${t}-view`);
+                const tabBtn = document.getElementById(`tab-${t}`);
+                if (view) view.classList.add('hidden');
+                if (tabBtn) tabBtn.classList.remove('active-tab');
             });
-            document.getElementById(`${tab}-view`).classList.remove('hidden');
-            document.getElementById(`tab-${tab}`).classList.add('active-tab');
+            const activeView = document.getElementById(`${tab}-view`);
+            const activeTabBtn = document.getElementById(`tab-${tab}`);
+            if (activeView) activeView.classList.remove('hidden');
+            if (activeTabBtn) activeTabBtn.classList.add('active-tab');
+            
             if (tab === 'standings') filterStandings('Skip');
             window.scrollTo(0,0);
         }
 
-        loadAppData();
+        window.onload = loadAppData;
     </script>
 </body>
 </html>
