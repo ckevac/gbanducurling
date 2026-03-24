@@ -81,6 +81,39 @@
             min-height: calc(100vh - 200px); 
         }
 
+        /* Ribbon Styling matching image_1a85c8.png */
+        .ribbon-container {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 38px;
+            height: 38px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .ribbon-shape {
+            width: 100%;
+            height: 100%;
+            clip-path: polygon(0 0, 100% 0, 100% 100%);
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-end;
+            padding-top: 4px;
+            padding-right: 6px;
+        }
+
+        .ribbon-a { background: var(--bandit-red); }
+        .ribbon-b { background: var(--bandit-navy); }
+
+        .ribbon-text { 
+            color: white; 
+            font-weight: 900; 
+            font-size: 11px; 
+            font-family: sans-serif;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+        }
+
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -90,6 +123,11 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
     </style>
+    <!-- iOS Web App Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GBU Curling">
+    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/10gkXR4l-Mifhhz2hevWdFM8TZiqoIe52">
 </head>
 <body class="min-h-screen pb-12 font-sans text-sm">
 
@@ -116,6 +154,7 @@
                 <p>A1: Checkbox (Visible)</p>
                 <p>A2: Your Message</p>
             </div>
+            <p class="text-[8px] italic opacity-50 text-center">Note: Google Pub-to-Web can take 2-5 mins to update.</p>
         </div>
     </div>
 
@@ -130,8 +169,8 @@
                      onerror="handleLogoError(this)">
             </div>
             
-            <div class="flex flex-col text-center sm:text-left">
-                <h2 class="text-xl sm:text-4xl font-black uppercase tracking-widest text-[#d9c5a0] leading-tight">
+            <div class="flex flex-col">
+                <h2 class="text-xl sm:text-4xl font-black uppercase tracking-widest text-[#d9c5a0] leading-tight text-center sm:text-left">
                     The Good, The Bad, & The Ugly <br class="hidden sm:block"> Curling League
                 </h2>
             </div>
@@ -139,8 +178,8 @@
         
         <div class="max-w-5xl mx-auto flex bg-[#1a252f] border-x border-[#1a252f] overflow-x-auto no-scrollbar">
             <button onclick="switchTab('schedule')" id="tab-schedule" class="tab-btn flex-1 py-3 sm:py-4 text-[9px] sm:text-xs font-black uppercase tracking-widest text-[#d9c5a0] transition-all min-w-[80px]">Schedule</button>
-            <button onclick="switchTab('playoffs')" id="tab-playoffs" class="tab-btn flex-1 py-3 sm:py-4 text-[9px] sm:text-xs font-black uppercase tracking-widest active-tab transition-all min-w-[80px]">Playoffs</button>
-            <button onclick="switchTab('standings')" id="tab-standings" class="tab-btn flex-1 py-3 sm:py-4 text-[9px] sm:text-xs font-black uppercase tracking-widest text-[#d9c5a0] transition-all min-w-[80px]">Standings</button>
+            <button onclick="switchTab('playoffs')" id="tab-playoffs" class="tab-btn flex-1 py-3 sm:py-4 text-[9px] sm:text-xs font-black uppercase tracking-widest text-[#d9c5a0] transition-all min-w-[80px]">Playoffs</button>
+            <button onclick="switchTab('standings')" id="tab-standings" class="tab-btn flex-1 py-3 sm:py-4 text-[9px] sm:text-xs font-black uppercase tracking-widest text-[#d9c5a0] active-tab transition-all min-w-[80px]">Standings</button>
             <button onclick="switchTab('info')" id="tab-info" class="tab-btn flex-1 py-3 sm:py-4 text-[9px] sm:text-xs font-black uppercase tracking-widest text-[#d9c5a0] transition-all min-w-[80px]">Info</button>
         </div>
     </header>
@@ -236,12 +275,14 @@
         let highestCompletedRound = 0;
         let logoClicks = 0;
         let clickTimer;
-        let currentViewedDate = "";
 
         async function fetchWithRetry(url, retries = 3, delay = 1000) {
             for (let i = 0; i < retries; i++) {
                 try {
-                    const response = await fetch(url, { method: 'GET', cache: 'no-store' });
+                    const response = await fetch(url, { 
+                        method: 'GET',
+                        cache: 'no-store',
+                    });
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     return await response.text();
                 } catch (e) {
@@ -255,8 +296,12 @@
         function handleLogoClick() {
             logoClicks++;
             clearTimeout(clickTimer);
-            if (logoClicks === 5) { toggleAdminPanel(); logoClicks = 0; }
-            else { clickTimer = setTimeout(() => { logoClicks = 0; }, 2000); }
+            if (logoClicks === 5) {
+                toggleAdminPanel();
+                logoClicks = 0;
+            } else {
+                clickTimer = setTimeout(() => { logoClicks = 0; }, 2000);
+            }
         }
 
         function toggleAdminPanel() {
@@ -267,11 +312,18 @@
         async function initBanner() {
             try {
                 const csvData = await fetchWithRetry(BANNER_URL).catch(() => null);
-                if (!csvData) { hideBannerUI(); return; }
+                if (!csvData) {
+                    hideBannerUI();
+                    return;
+                }
                 const rows = Papa.parse(csvData, { header: false, skipEmptyLines: false }).data;
-                if (!rows || rows.length === 0) { hideBannerUI(); return; }
-                const rawA1 = (rows[0] && rows[0][0]) ? rows[0][0].toString().trim().toUpperCase() : "";
-                const isVisible = (rawA1 === 'TRUE' || rawA1 === '1' || rawA1 === 'YES' || rawA1 === 'ON' || rawA1 === '☑');
+                if (!rows || rows.length === 0) {
+                    hideBannerUI();
+                    return;
+                }
+                const rawA1 = (rows[0] && rows[0][0]) ? rows[0][0].toString().trim() : "";
+                const valA1 = rawA1.toUpperCase();
+                const isVisible = (valA1 === 'TRUE' || valA1 === '1' || valA1 === 'YES' || valA1 === 'ON' || valA1 === '☑' || valA1 === 'CHECKED');
                 const bannerText = (rows[1] && rows[1][0]) ? rows[1][0].trim() : "";
                 const marquee = document.getElementById('marquee-text');
                 const container = document.getElementById('banner-container');
@@ -280,8 +332,13 @@
                     marquee.innerHTML = `🚨 ${bannerText} 🚨`;
                     container.style.display = 'block';
                     header.style.top = (window.innerWidth < 640 ? '28px' : '36px');
-                } else { hideBannerUI(); }
-            } catch (e) { hideBannerUI(); }
+                } else {
+                    hideBannerUI();
+                }
+            } catch (e) {
+                console.warn("Banner failed to load:", e);
+                hideBannerUI();
+            }
         }
 
         function hideBannerUI() {
@@ -303,20 +360,35 @@
                 ]);
 
                 let plyRaw = "";
-                try { plyRaw = await fetchWithRetry(PLAYOFF_URL); } catch (e) {}
+                try {
+                    plyRaw = await fetchWithRetry(PLAYOFF_URL);
+                } catch (e) {
+                    console.warn("Playoff schedule sheet failure.");
+                }
 
                 processStandings(Papa.parse(stdRaw, { header: true, skipEmptyLines: true }).data);
                 processSchedule(Papa.parse(schRaw, { header: false, skipEmptyLines: true }).data);
                 
                 if (plyRaw) {
                     processPlayoffs(Papa.parse(plyRaw, { header: false, skipEmptyLines: true }).data);
+                } else {
+                    document.getElementById('playoffs-list').innerHTML = `<div class="col-span-full text-center p-8 opacity-50 font-black uppercase text-[10px]">Playoff Schedule Pending</div>`;
                 }
 
                 document.getElementById('loading').classList.add('hidden');
-                switchTab('playoffs'); 
+                
+                // Show standings by default based on latest requirement
+                switchTab('standings'); 
+                
                 initBanner();
+
             } catch (e) {
-                document.getElementById('loading').innerHTML = `<div class="text-red-800 text-center p-10 font-black uppercase italic"><p>Connection Error</p><button onclick="location.reload()" class="bg-[#a63a2a] text-white px-4 py-2 rounded text-[10px] mt-4">Retry</button></div>`;
+                console.error("Critical app load failure:", e);
+                document.getElementById('loading').innerHTML = `
+                    <div class="text-red-800 text-center p-10 font-black uppercase italic space-y-4">
+                        <p>Connection Error</p>
+                        <button onclick="location.reload()" class="bg-[#a63a2a] text-white px-4 py-2 rounded text-[10px] mt-4 shadow-lg active:translate-y-0.5">Retry Connection</button>
+                    </div>`;
             }
         }
 
@@ -328,32 +400,40 @@
                 const name = (vals[1] || "").trim();
                 const ends = (vals[2] || "0");
                 const pts = (vals[3] || "0");
-                if (!name || name === "Name") return;
+                if (pos === "Position" || !name) return;
                 let category = pos.includes("Skip") ? "Skip" : (pos.includes("Vice") || pos.includes("Third") ? "Vice" : (pos.includes("Second") ? "Second" : (pos.includes("Lead") ? "Lead" : "")));
                 if (category) allStandings[category].push({ name, ends: parseFloat(ends), pts: parseFloat(pts) });
             });
             Object.keys(allStandings).forEach(pos => {
-                allStandings[pos].sort((a, b) => (b.pts - a.pts) || (b.ends - a.ends));
+                allStandings[pos].sort((a, b) => {
+                    if (b.pts !== a.pts) return b.pts - a.pts;
+                    return b.ends - a.ends;
+                });
             });
         }
 
         function processSchedule(rows) {
             allGames = {};
+            highestCompletedRound = 0;
             for (let i = 1; i < rows.length; i++) {
                 const row = rows[i];
                 if (!row || row.length < 5) continue;
                 const [date, roundStr, gameNumStr, sheetRaw, skip, vice, second, lead, score, endsWon, result] = row;
+                const round = parseInt(roundStr);
+                const gameNum = parseInt(gameNumStr);
                 if (!date || date.toLowerCase() === "date" || !sheetRaw) continue;
                 if (!allGames[date]) allGames[date] = {};
                 const sheetId = sheetRaw.toLowerCase().replace("sheet", "").trim();
-                if (!allGames[date][sheetId]) allGames[date][sheetId] = { sheetDisplay: sheetRaw, round: roundStr, gameNum: gameNumStr, teams: [] };
+                if (!allGames[date][sheetId]) allGames[date][sheetId] = { sheetDisplay: sheetRaw, round, gameNum, teams: [] };
                 allGames[date][sheetId].teams.push({ skip, vice, second, lead, score, endsWon, result });
+                if (gameNum === 4 && result && result !== "" && round > highestCompletedRound) highestCompletedRound = round;
             }
             const dates = Object.keys(allGames).sort((a, b) => new Date(a) - new Date(b));
+            const today = new Date().setHours(0,0,0,0);
+            const defaultDate = dates.find(d => new Date(d) >= today) || dates[0];
+            
             const select = document.getElementById('date-select');
             if (select) {
-                const today = new Date().setHours(0,0,0,0);
-                const defaultDate = dates.find(d => new Date(d) >= today) || dates[0];
                 select.innerHTML = dates.map(d => `<option value="${d}" ${d === defaultDate ? 'selected' : ''}>${d}</option>`).join('');
                 filterScheduleByDate(defaultDate);
             }
@@ -368,7 +448,14 @@
                 if (!date || date.toLowerCase() === "date" || !sheetRaw) continue;
                 if (!allPlayoffs[date]) allPlayoffs[date] = {};
                 const sheetId = sheetRaw.toLowerCase().replace("sheet", "").trim();
-                if (!allPlayoffs[date][sheetId]) allPlayoffs[date][sheetId] = { sheetDisplay: sheetRaw, round: roundStr, gameNum: gameNumStr, teams: [] };
+                if (!allPlayoffs[date][sheetId]) {
+                    allPlayoffs[date][sheetId] = { 
+                        sheetDisplay: sheetRaw, 
+                        round: roundStr, 
+                        gameNum: gameNumStr, 
+                        teams: [] 
+                    };
+                }
                 allPlayoffs[date][sheetId].teams.push({ skip, vice, second, lead, score, endsWon, result });
             }
             const dates = Object.keys(allPlayoffs).sort((a, b) => new Date(a) - new Date(b));
@@ -380,79 +467,98 @@
         }
 
         function filterScheduleByDate(date) {
-            currentViewedDate = date;
             const list = document.getElementById('schedule-list');
+            const banner = document.getElementById('round-banner');
+            const roundText = document.getElementById('round-text');
             const dateGames = allGames[date];
             if (!dateGames || !list) return;
-            const first = dateGames[Object.keys(dateGames)[0]];
-            document.getElementById('round-text').innerText = `Round ${first.round} • Game ${first.gameNum}`;
-            document.getElementById('round-banner').classList.remove('hidden');
-            list.innerHTML = renderItems(dateGames, false);
+            const sheetKeys = Object.keys(dateGames).sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0));
+            const first = dateGames[sheetKeys[0]];
+            
+            if (roundText) roundText.innerText = `Round ${first.round} • Game ${first.gameNum}`;
+            if (banner) banner.classList.remove('hidden');
+            
+            if (first.round > 1 && first.round > (highestCompletedRound + 1)) {
+                list.innerHTML = `<div class="col-span-full text-center p-8 opacity-50 font-black uppercase text-[10px]">Round Locked</div>`;
+                return;
+            }
+            list.innerHTML = renderScheduleItems(dateGames);
         }
 
         function filterPlayoffsByDate(date) {
-            currentViewedDate = date;
             const list = document.getElementById('playoffs-list');
+            const banner = document.getElementById('playoff-round-banner');
+            const roundText = document.getElementById('playoff-round-text');
             const dateGames = allPlayoffs[date];
             if (!dateGames || !list) return;
             
-            let bannerLabel = "Playoffs";
-            if (date.includes("March 30")) bannerLabel = "Playoffs Game 1";
-            else if (date.includes("April 6")) bannerLabel = "Playoffs Game 2";
-            else {
-                const first = dateGames[Object.keys(dateGames)[0]];
-                bannerLabel = `${first.round} • ${first.gameNum}`;
+            let customBanner = "Playoff Schedule";
+            if (date.includes("March 30") || date.includes("03/30")) {
+                customBanner = "Playoffs Game 1";
+            } else if (date.includes("April 6") || date.includes("04/06")) {
+                customBanner = "Playoffs Game 2";
+            } else {
+                const sheetKeys = Object.keys(dateGames).sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0));
+                const first = dateGames[sheetKeys[0]];
+                customBanner = `${first.round} • ${first.gameNum}`;
             }
-
-            document.getElementById('playoff-round-text').innerText = bannerLabel;
-            document.getElementById('playoff-round-banner').classList.remove('hidden');
-            list.innerHTML = renderItems(dateGames, true);
+            
+            if (roundText) roundText.innerText = customBanner;
+            if (banner) banner.classList.remove('hidden');
+            
+            list.innerHTML = renderScheduleItems(dateGames, true);
         }
 
-        function renderItems(dateGames, isPlayoffs) {
-            const keys = Object.keys(dateGames).sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0));
-            return keys.map(sId => {
+        function renderScheduleItems(dateGames, isPlayoffs = false) {
+            const sheetKeys = Object.keys(dateGames).sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0));
+            return sheetKeys.map(sId => {
                 const game = dateGames[sId];
-                let headerText = "";
-                if (isPlayoffs) {
-                    headerText = `${game.round} ${game.gameNum ? '- ' + game.gameNum : ''} - ${game.sheetDisplay}`;
-                } else {
-                    const sNum = game.sheetDisplay.toLowerCase().replace("sheet", "").trim();
-                    headerText = `Sheet ${sNum}`;
-                }
+                let sheetLabel = game.sheetDisplay.toLowerCase().includes('sheet') ? game.sheetDisplay : `Sheet ${game.sheetDisplay}`;
                 
-                return `<div class="glass-card rounded border border-[#d9c5a0] overflow-hidden">
-                    <div class="bg-[#f4eee1] px-2 py-1 border-b border-[#d9c5a0] text-center">
-                        <span class="text-[9px] font-black text-[#735338] uppercase tracking-widest">${headerText}</span>
-                    </div>
-                    <div class="p-3 flex items-start justify-between gap-4">
-                        ${renderTeam(game.teams[0], false)}
-                        <div class="text-[8px] font-black text-[#d9c5a0] italic mt-2">VS</div>
-                        ${renderTeam(game.teams[1], true)}
-                    </div>
-                </div>`;
+                if (isPlayoffs) {
+                    sheetLabel = `${game.round} ${game.gameNum} - ${sheetLabel}`;
+                }
+
+                return `
+                    <div class="glass-card rounded border border-[#d9c5a0] overflow-hidden">
+                        <div class="bg-[#f4eee1] px-2 py-1 border-b border-[#d9c5a0] text-center">
+                            <span class="text-[9px] font-black text-[#735338] uppercase tracking-widest">${sheetLabel}</span>
+                        </div>
+                        <div class="p-3 flex items-start justify-between gap-4">
+                            ${renderTeam(game.teams[0], false)}
+                            <div class="text-[8px] font-black text-[#d9c5a0] italic mt-2">VS</div>
+                            ${renderTeam(game.teams[1], true)}
+                        </div>
+                    </div>`;
             }).join('');
         }
 
         function renderTeam(team, isRight) {
-            if (!team || !team.skip) {
-                // Check if this is the April 6th playoff date
-                const isApril6Playoff = currentViewedDate.includes("April 6");
-                const placeholder = isApril6Playoff ? "TBD" : "BYE";
-                return `<div class="flex-1 opacity-40 italic font-black text-[10px] ${isRight ? 'text-left' : 'text-right'} uppercase">${placeholder}</div>`;
-            }
-            let resText = (team.result || "").toUpperCase();
-            let resColor = resText === "W" ? "text-green-700" : (resText === "L" ? "text-red-700" : "text-black");
-            return `<div class="flex-1 min-w-0 ${isRight ? 'text-left' : 'text-right'}">
-                <div class="font-black text-[#a63a2a] text-xs sm:text-sm uppercase leading-tight truncate mb-1.5">${team.skip}</div>
-                <div class="space-y-0.5 text-[10px] sm:text-[11px] text-[#735338] font-bold uppercase opacity-90 leading-none">
-                    <div>V: ${team.vice || ''}</div><div>S: ${team.second || ''}</div><div>L: ${team.lead || ''}</div>
-                </div>
-                ${team.result ? `<div class="mt-3 flex flex-col ${isRight ? 'items-start' : 'items-end'}">
-                    <span class="text-[10px] font-black ${resColor} uppercase tracking-tight">${resText === 'W' ? 'WIN' : (resText === 'L' ? 'LOSS' : 'TIE')}</span>
-                    <div class="flex items-baseline gap-1.5"><span class="text-sm sm:text-lg font-black text-[#2d3e50]">${team.score}</span><span class="text-[9px] sm:text-xs font-bold text-[#735338] italic">(${team.endsWon} Ends)</span></div>
-                </div>` : ''}
-            </div>`;
+            if (!team || !team.skip) return `<div class="flex-1 text-[10px] opacity-40 italic">BYE</div>`;
+            let resText = "";
+            let resColorClass = "text-gray-500";
+            const normalizedResult = (team.result || "").toUpperCase();
+            if (normalizedResult === "W") { resText = "WIN"; resColorClass = "text-green-700"; }
+            else if (normalizedResult === "L") { resText = "LOSS"; resColorClass = "text-red-700"; }
+            else if (normalizedResult === "T") { resText = "TIE"; resColorClass = "text-black"; }
+            else { resText = normalizedResult; }
+            return `
+                <div class="flex-1 min-w-0 ${isRight ? 'text-left' : 'text-right'}">
+                    <div class="font-black text-[#a63a2a] text-xs sm:text-sm uppercase leading-tight truncate mb-1.5">${team.skip}</div>
+                    <div class="space-y-0.5">
+                        <div class="text-[10px] sm:text-[11px] text-[#735338] font-bold uppercase opacity-90 leading-none">V: ${team.vice || ''}</div>
+                        <div class="text-[10px] sm:text-[11px] text-[#735338] font-bold uppercase opacity-90 leading-none">S: ${team.second || ''}</div>
+                        <div class="text-[10px] sm:text-[11px] text-[#735338] font-bold uppercase opacity-90 leading-none">L: ${team.lead || ''}</div>
+                    </div>
+                    ${team.result ? `
+                        <div class="mt-3 flex flex-col ${isRight ? 'items-start' : 'items-end'}">
+                            <span class="text-[10px] font-black ${resColorClass} uppercase tracking-tight">${resText}</span>
+                            <div class="flex items-baseline gap-1.5">
+                                <span class="text-sm sm:text-lg font-black text-[#2d3e50]">${team.score}</span>
+                                <span class="text-[9px] sm:text-xs font-bold text-[#735338] italic">(${team.endsWon} Ends)</span>
+                            </div>
+                        </div>` : ''}
+                </div>`;
         }
 
         function filterStandings(pos) {
@@ -460,42 +566,59 @@
                 b.classList.remove('bg-[#2d3e50]', 'text-white');
                 b.classList.add('bg-white', 'text-[#735338]');
             });
-            document.getElementById(`btn-${pos}`).classList.replace('bg-white', 'bg-[#2d3e50]');
-            document.getElementById(`btn-${pos}`).classList.replace('text-[#735338]', 'text-white');
+            const btn = document.getElementById(`btn-${pos}`);
+            if (btn) {
+                btn.classList.add('bg-[#2d3e50]', 'text-white');
+                btn.classList.remove('bg-white', 'text-[#735338]');
+            }
+            const list = document.getElementById('standings-list');
+            if (!list) return;
             const players = allStandings[pos] || [];
-            document.getElementById('standings-list').innerHTML = players.map((p, idx) => {
-                return `<div class="bg-white rounded border border-[#d9c5a0] p-2 flex items-center justify-between relative shadow-sm">
-                    <div class="flex items-center gap-2">
-                        <span class="w-6 h-6 flex items-center justify-center bg-[#f4eee1] rounded text-[10px] font-black text-[#a63a2a]">${idx + 1}</span>
-                        <span class="font-black text-[#2d3e50] uppercase text-[11px] truncate max-w-[120px]">${p.name}</span>
-                    </div>
-                    <div class="flex items-baseline gap-3 text-right">
-                        <div><span class="text-[7px] font-bold opacity-40 uppercase block">Ends</span><span class="text-[10px] font-black text-[#735338]">${p.ends}</span></div>
-                        <div><span class="text-[7px] font-bold opacity-40 uppercase block">Pts</span><span class="text-base font-black text-[#a63a2a]">${p.pts}</span></div>
-                    </div>
-                </div>`;
+            list.innerHTML = players.map((p, idx) => {
+                const pool = idx < 4 ? 'A' : (idx < 8 ? 'B' : null);
+                let ribbon = '';
+                if (pool === 'A') {
+                    ribbon = `<div class="ribbon-container"><div class="ribbon-shape ribbon-a"><span class="ribbon-text">A</span></div></div>`;
+                } else if (pool === 'B') {
+                    ribbon = `<div class="ribbon-container"><div class="ribbon-shape ribbon-b"><span class="ribbon-text">B</span></div></div>`;
+                }
+                
+                return `
+                    <div class="bg-white rounded border border-[#d9c5a0] p-4 flex items-center justify-between relative overflow-hidden shadow-sm">
+                        ${ribbon}
+                        <div class="flex items-center gap-4">
+                            <span class="w-7 h-7 flex items-center justify-center bg-[#f4eee1] rounded text-[11px] font-black text-[#a63a2a]">${idx + 1}</span>
+                            <span class="font-black text-[#2d3e50] uppercase text-[13px] tracking-wide">${p.name}</span>
+                        </div>
+                        <div class="flex items-baseline gap-6 pr-4">
+                            <div class="flex flex-col items-end">
+                                <span class="text-[7px] font-bold opacity-40 uppercase tracking-widest leading-none mb-1">Ends</span>
+                                <span class="text-[12px] font-black text-[#735338]">${p.ends}</span>
+                            </div>
+                            <div class="flex flex-col items-end">
+                                <span class="text-[7px] font-bold opacity-40 uppercase tracking-widest leading-none mb-1">Pts</span>
+                                <span class="text-xl font-black text-[#a63a2a] leading-none">${p.pts}</span>
+                            </div>
+                        </div>
+                    </div>`;
             }).join('');
         }
 
         function switchTab(tab) {
             ['schedule', 'standings', 'info', 'playoffs'].forEach(t => {
-                document.getElementById(`${t}-view`)?.classList.add('hidden');
-                document.getElementById(`tab-${t}`)?.classList.remove('active-tab');
-                document.getElementById(`tab-${t}`)?.classList.add('text-[#d9c5a0]');
+                const view = document.getElementById(`${t}-view`);
+                const tabBtn = document.getElementById(`tab-${t}`);
+                if (view) view.classList.add('hidden');
+                if (tabBtn) tabBtn.classList.remove('active-tab');
+                if (tabBtn) tabBtn.classList.add('text-[#d9c5a0]');
             });
-            document.getElementById(`${tab}-view`)?.classList.remove('hidden');
-            const btn = document.getElementById(`tab-${tab}`);
-            if (btn) { btn.classList.add('active-tab'); btn.classList.remove('text-[#d9c5a0]'); }
-            
-            // Refresh current viewed date when switching to update placeholders
-            if (tab === 'playoffs') {
-                const select = document.getElementById('playoff-date-select');
-                if (select) filterPlayoffsByDate(select.value);
-            } else if (tab === 'schedule') {
-                const select = document.getElementById('date-select');
-                if (select) filterScheduleByDate(select.value);
+            const activeView = document.getElementById(`${tab}-view`);
+            const activeTabBtn = document.getElementById(`tab-${tab}`);
+            if (activeView) activeView.classList.remove('hidden');
+            if (activeTabBtn) {
+                activeTabBtn.classList.add('active-tab');
+                activeTabBtn.classList.remove('text-[#d9c5a0]');
             }
-            
             if (tab === 'standings') filterStandings('Skip');
             window.scrollTo(0,0);
         }
