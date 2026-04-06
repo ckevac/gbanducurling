@@ -350,7 +350,18 @@
                 if (plyRaw) processPlayoffs(Papa.parse(plyRaw, { header: false, skipEmptyLines: true }).data);
 
                 document.getElementById('loading').classList.add('hidden');
-                switchTab('standings'); 
+                
+                // NEW: Default to Playoffs tab and April 6 date
+                switchTab('playoffs'); 
+                const playSelect = document.getElementById('playoff-date-select');
+                if (playSelect) {
+                    const april6Option = Array.from(playSelect.options).find(opt => opt.value.includes("April 6") || opt.value.includes("04/06"));
+                    if (april6Option) {
+                        playSelect.value = april6Option.value;
+                        filterPlayoffsByDate(april6Option.value);
+                    }
+                }
+
                 initBanner();
             } catch (e) {
                 document.getElementById('loading').innerHTML = `<div class="text-red-800 text-center p-10 font-black uppercase italic">Connection Error</div>`;
@@ -443,9 +454,8 @@
         function renderScheduleItems(dateGames, isPlayoffs, date) {
             const sheetKeys = Object.keys(dateGames).sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0));
             
-            // Explicit override rosters for April 6
             const specialRosters = {
-                "steve sharp": { vice: "JAMIE LAWRIE", second: "JON JENKINS", lead: "CILL DREWERY" },
+                "steve sharp": { vice: "JAMIE LAWRIE", second: "JON JENKINS", lead: "BILL DREWERY" },
                 "frank meany": { vice: "MARK JOEL", second: "JOHN LEFAIVE", lead: "JOE SAUNDERCOOK" }
             };
 
@@ -463,13 +473,11 @@
                     game.teams.forEach(t => {
                         if (!t.skip) return;
                         const sKey = t.skip.toLowerCase();
-                        // Priority 1: Special Request Override
                         if (specialRosters[sKey]) {
                             t.vice = specialRosters[sKey].vice;
                             t.second = specialRosters[sKey].second;
                             t.lead = specialRosters[sKey].lead;
                         } 
-                        // Priority 2: Master Roster Lookup
                         else if (masterRosters[sKey]) {
                             t.vice = masterRosters[sKey].vice;
                             t.second = masterRosters[sKey].second;
@@ -520,8 +528,11 @@
                 b.classList.remove('bg-[#2d3e50]', 'text-white');
                 b.classList.add('bg-white', 'text-[#735338]');
             });
-            document.getElementById(`btn-${pos}`).classList.replace('bg-white', 'bg-[#2d3e50]');
-            document.getElementById(`btn-${pos}`).classList.replace('text-[#735338]', 'text-white');
+            const activeBtn = document.getElementById(`btn-${pos}`);
+            if (activeBtn) {
+                activeBtn.classList.replace('bg-white', 'bg-[#2d3e50]');
+                activeBtn.classList.replace('text-[#735338]', 'text-white');
+            }
             const list = document.getElementById('standings-list');
             const players = (allStandings[pos] || []).sort((a,b) => b.pts !== a.pts ? b.pts - a.pts : b.ends - a.ends);
             list.innerHTML = players.map((p, idx) => {
@@ -549,11 +560,16 @@
 
         function switchTab(tab) {
             ['schedule', 'standings', 'info', 'playoffs'].forEach(t => {
-                document.getElementById(`${t}-view`).classList.add('hidden');
-                document.getElementById(`tab-${t}`).classList.remove('active-tab');
+                const view = document.getElementById(`${t}-view`);
+                const tabBtn = document.getElementById(`tab-${t}`);
+                if (view) view.classList.add('hidden');
+                if (tabBtn) tabBtn.classList.remove('active-tab');
             });
-            document.getElementById(`${tab}-view`).classList.remove('hidden');
-            document.getElementById(`tab-${tab}`).classList.add('active-tab');
+            const activeView = document.getElementById(`${tab}-view`);
+            const activeTabBtn = document.getElementById(`tab-${tab}`);
+            if (activeView) activeView.classList.remove('hidden');
+            if (activeTabBtn) activeTabBtn.classList.add('active-tab');
+            
             if (tab === 'standings') filterStandings('Skip');
             window.scrollTo(0,0);
         }
