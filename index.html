@@ -1,580 +1,833 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="referrer" content="no-referrer-when-downgrade">
-    <title>The Good, the Bad, and the Ugly Curling League</title>
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="https://lh3.googleusercontent.com/u/0/d/10gkXR4l-Mifhhz2hevWdFM8TZiqoIe52">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --vintage-tan: #d9c5a0;
-            --bandit-red: #a63a2a;
-            --bandit-navy: #2d3e50;
-            --rope-brown: #735338;
-            --paper-white: #f4eee1;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Good, the Bad &amp; the Ugly Curling League</title>
+<meta name="description" content="Schedule, standings, photos and league info for The Good, the Bad &amp; the Ugly Curling League — Mondays at the Whitby Curling Club.">
+<meta name="theme-color" content="#2d3e50">
+<link rel="icon" href="https://lh3.googleusercontent.com/d/10gkXR4l-Mifhhz2hevWdFM8TZiqoIe52">
+<link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/10gkXR4l-Mifhhz2hevWdFM8TZiqoIe52">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GBU Curling">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f4eee1;
+  --paper-deep: #ebe2cf;
+  --tan: #d9c5a0;
+  --red: #a63a2a;
+  --red-dark: #84291c;
+  --navy: #2d3e50;
+  --navy-dark: #1d2a36;
+  --rope: #735338;
+  --ink: #22303d;
+  --muted: #6c5a49;
+  --win: #2f6b45;
+  --card: #fffdf8;
+  --nav-h: 64px;
+  --display: "Rye", Georgia, serif;
+  --ui: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --cond: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font: 16px/1.5 var(--ui);
+  padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px);
+}
+a { color: var(--red); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-        body { background-color: var(--paper-white); color: var(--bandit-navy); overflow-x: hidden; }
-        
-        .active-tab { 
-            color: var(--vintage-tan); 
-            border-bottom: 4px solid var(--vintage-tan); 
-            background: rgba(217, 197, 160, 0.15);
-        }
+/* ---------- banner ---------- */
+.banner { background: var(--red); color: #fff; overflow: hidden; white-space: nowrap; font: 600 15px/1 var(--cond); letter-spacing: .02em; }
+.banner span { display: inline-block; padding: 9px 0 9px 100%; animation: marquee 22s linear infinite; }
+@keyframes marquee { to { transform: translateX(-100%); } }
+@media (prefers-reduced-motion: reduce) { .banner span { animation: none; padding-left: 16px; white-space: normal; } }
 
-        .loading-spinner { 
-            border: 4px solid var(--vintage-tan); 
-            border-top: 4px solid var(--bandit-red); 
-            border-radius: 50%; width: 40px; height: 40px; 
-            animation: spin 1s linear infinite; 
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+/* ---------- header ---------- */
+.masthead {
+  background: linear-gradient(var(--navy), var(--navy-dark));
+  color: var(--tan); border-bottom: 4px solid var(--rope);
+  padding: 14px 16px; padding-top: max(14px, env(safe-area-inset-top));
+}
+.masthead-inner { max-width: 960px; margin: 0 auto; display: flex; align-items: center; gap: 14px; }
+.logo {
+  width: 64px; height: 64px; flex: none; border-radius: 50%; overflow: hidden;
+  border: 3px solid var(--tan); background: #fff; padding: 0; cursor: pointer;
+}
+.logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.masthead h1 { margin: 0; font: 400 clamp(20px, 5.6vw, 34px)/1.05 var(--display); color: var(--tan); }
+.masthead p { margin: 4px 0 0; font: 500 14px/1.3 var(--cond); color: #c9b892; letter-spacing: .02em; }
 
-        .glass-card { 
-            background: white; 
-            border: 1px solid var(--vintage-tan);
-            box-shadow: 0 4px 6px -1px rgba(115, 83, 56, 0.1);
-        }
+/* ---------- nav: bottom bar on phones, tabs under header on wide screens ---------- */
+.nav {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+  background: var(--navy-dark); border-top: 2px solid var(--rope);
+  padding-bottom: env(safe-area-inset-bottom);
+  display: flex;
+}
+.nav button {
+  flex: 1; min-height: var(--nav-h); background: none; border: 0; cursor: pointer;
+  color: #b7a888; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  font: 600 12px/1 var(--cond); letter-spacing: .03em;
+}
+.nav svg { width: 24px; height: 24px; }
+.nav button[aria-current="page"] { color: var(--tan); box-shadow: inset 0 3px 0 var(--red); background: rgba(217,197,160,.08); }
+@media (min-width: 768px) {
+  body { padding-bottom: 32px; }
+  .nav { position: sticky; top: 0; bottom: auto; border-top: 0; border-bottom: 2px solid var(--rope); justify-content: center; padding: 0; }
+  .nav button { flex: 0 1 150px; flex-direction: row; gap: 8px; font-size: 16px; min-height: 52px; }
+  .nav svg { width: 20px; height: 20px; }
+  .nav button[aria-current="page"] { box-shadow: inset 0 -3px 0 var(--red); }
+  .logo { width: 96px; height: 96px; }
+}
 
-        .header-gradient {
-            background: linear-gradient(to bottom, #2d3e50, #1a252f);
-            border-bottom: 4px solid var(--rope-brown);
-        }
+/* ---------- layout ---------- */
+main { max-width: 960px; margin: 0 auto; padding: 16px; }
+.view[hidden] { display: none; }
+.section-title { font: 400 26px/1.15 var(--display); color: var(--navy); margin: 8px 0 12px; }
+.lede { margin: 0 0 16px; color: var(--muted); }
+.panel { background: var(--card); border: 1px solid var(--tan); border-radius: 10px; padding: 16px; }
+.stack > * + * { margin-top: 16px; }
+.grid-2 { display: grid; gap: 16px; }
+@media (min-width: 768px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
 
-        /* LANDSCAPE OPTIMIZATION */
-        @media (max-height: 500px) and (orientation: landscape) {
-            header .logo-container { width: 40px; height: 40px; border-width: 1px; }
-            header .main-header-content { padding-top: 0.25rem; padding-bottom: 0.25rem; gap: 0.5rem !important; }
-            header h2 { font-size: 0.9rem !important; }
-            header h1 { display: none; }
-            .announcement-banner { padding-top: 0.15rem; padding-bottom: 0.15rem; font-size: 0.6rem; }
-            .sticky-nav-offset { top: 1.2rem !important; }
-            header .tab-btn { py: 0.4rem !important; font-size: 8px !important; }
-            #date-select-container { margin-top: 0.25rem !important; }
-        }
+/* ---------- next game (the poster) ---------- */
+.poster {
+  background: var(--card); border: 2px solid var(--rope); border-radius: 4px;
+  box-shadow: 0 0 0 5px var(--paper), 0 0 0 6px var(--tan);
+  padding: 18px 16px 16px; text-align: center; margin: 6px 6px 22px;
+}
+.poster .kicker { font: 700 15px/1 var(--cond); color: var(--red); letter-spacing: .04em; }
+.poster .when { font: 400 clamp(28px, 8vw, 44px)/1.05 var(--display); color: var(--navy); margin: 8px 0 6px; }
+.poster .sub { font: 600 17px/1.3 var(--cond); color: var(--muted); }
+.poster .count { display: inline-block; margin-top: 10px; background: var(--navy); color: var(--tan); border-radius: 999px; padding: 4px 12px; font: 600 15px/1.2 var(--cond); }
 
-        select { 
-            -webkit-appearance: none; -moz-appearance: none; appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23735338'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            background-size: 1.5em;
-        }
+/* ---------- game cards ---------- */
+.games { display: grid; gap: 12px; }
+@media (min-width: 700px) { .games { grid-template-columns: 1fr 1fr; } }
+.game { background: var(--card); border: 1px solid var(--tan); border-radius: 10px; overflow: hidden; }
+.game-head { display: flex; justify-content: space-between; align-items: center; padding: 6px 12px; background: var(--paper-deep); border-bottom: 1px solid var(--tan); font: 700 15px/1.2 var(--cond); color: var(--rope); }
+.team { display: flex; align-items: center; gap: 10px; padding: 10px 12px; }
+.team + .team { border-top: 1px dashed var(--tan); }
+.team-names { flex: 1; min-width: 0; }
+.skip { font: 700 19px/1.2 var(--cond); color: var(--red); }
+.crew { font-size: 14px; color: var(--muted); line-height: 1.35; }
+.crew b { font-weight: 600; color: var(--ink); }
+.crew .nw { white-space: nowrap; margin-right: 8px; }
+.pool { white-space: nowrap; }
+.me { background: #fff3c9; border-radius: 3px; box-shadow: 0 0 0 2px #fff3c9; }
+.result { text-align: right; flex: none; min-width: 64px; }
+.score { font: 700 24px/1 var(--cond); color: var(--navy); }
+.ends { font-size: 13px; color: var(--muted); }
+.badge { display: inline-block; font: 700 13px/1 var(--cond); letter-spacing: .04em; padding: 4px 7px; border-radius: 4px; margin-bottom: 4px; }
+.b-Win { background: var(--win); color: #fff; }
+.b-Loss { background: var(--red); color: #fff; }
+.b-Tie { background: var(--tan); color: var(--navy); }
 
-        @keyframes marquee {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
-        .animate-marquee {
-            display: inline-block;
-            white-space: nowrap;
-            animation: marquee 25s linear infinite;
-        }
-        
-        .view-schedule, .view-standings, .view-info, .view-playoffs { 
-            min-height: calc(100vh - 200px); 
-        }
+/* ---------- schedule controls ---------- */
+.seg { display: flex; background: var(--paper-deep); border: 1px solid var(--tan); border-radius: 10px; padding: 3px; gap: 3px; margin-bottom: 14px; }
+.seg button { flex: 1; border: 0; background: none; border-radius: 8px; padding: 9px 6px; cursor: pointer; font: 600 16px/1 var(--cond); color: var(--rope); }
+.seg button[aria-pressed="true"] { background: var(--navy); color: var(--tan); }
+.weekbar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.weekbar .arrow { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--tan); background: var(--card); cursor: pointer; font-size: 20px; color: var(--navy); }
+.weekbar .arrow:disabled { opacity: .35; cursor: default; }
+.weekbar .label { flex: 1; text-align: center; }
+.weekbar .label strong { display: block; font: 400 22px/1.15 var(--display); color: var(--navy); }
+.weekbar .label span { font: 600 15px/1.2 var(--cond); color: var(--muted); }
+.chips { display: flex; gap: 6px; overflow-x: auto; padding: 2px 2px 10px; margin-bottom: 8px; scrollbar-width: none; scroll-snap-type: x proximity; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; scroll-snap-align: center; border: 1px solid var(--tan); background: var(--card); border-radius: 8px; padding: 6px 10px; cursor: pointer; text-align: center; line-height: 1.1; }
+.chip b { display: block; font: 700 15px/1.1 var(--cond); color: var(--navy); }
+.chip small { font: 500 12px/1.1 var(--cond); color: var(--muted); }
+.chip.done b::after { content: " ✓"; color: var(--win); }
+.chip[aria-current="true"] { background: var(--red); border-color: var(--red); }
+.chip[aria-current="true"] b, .chip[aria-current="true"] small { color: #fff; }
+.chip[aria-current="true"].done b::after { color: #fff; }
 
-        /* Ribbon Styling matching image_1a85c8.png */
-        .ribbon-container {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 38px;
-            height: 38px;
-            pointer-events: none;
-            z-index: 10;
-        }
+/* ---------- my games ---------- */
+.picker { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.picker label { font: 600 16px/1.2 var(--cond); color: var(--navy); }
+select {
+  font: 600 16px/1.2 var(--ui); color: var(--navy); background: var(--card);
+  border: 2px solid var(--tan); border-radius: 8px; padding: 9px 36px 9px 12px; min-height: 44px; max-width: 100%;
+  -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23735338' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center; background-size: 18px;
+}
+.mylist { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.myrow { background: var(--card); border: 1px solid var(--tan); border-radius: 10px; padding: 10px 12px; display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; align-items: center; }
+.myrow.next { border: 2px solid var(--red); }
+.mydate { text-align: center; font: 700 15px/1.1 var(--cond); color: var(--navy); }
+.mydate span { display: block; font: 400 26px/1 var(--display); color: var(--red); }
+.myteam { font-size: 14px; color: var(--muted); line-height: 1.35; }
+.myteam .vs { font: 700 17px/1.2 var(--cond); color: var(--ink); }
 
-        .ribbon-shape {
-            width: 100%;
-            height: 100%;
-            clip-path: polygon(0 0, 100% 0, 100% 100%);
-            display: flex;
-            align-items: flex-start;
-            justify-content: flex-end;
-            padding-top: 4px;
-            padding-right: 6px;
-        }
+/* ---------- standings ---------- */
+.table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--tan); border-radius: 10px; overflow: hidden; }
+.table th { font: 600 14px/1.2 var(--cond); color: var(--muted); text-align: right; padding: 8px 10px; background: var(--paper-deep); border-bottom: 1px solid var(--tan); }
+.table th:nth-child(2), .table td:nth-child(2) { text-align: left; }
+.table td { padding: 11px 10px; border-bottom: 1px solid #efe5d2; text-align: right; font-variant-numeric: tabular-nums; }
+.table tr:last-child td { border-bottom: 0; }
+.rank { width: 36px; text-align: center !important; font: 700 18px/1 var(--cond); color: var(--rope); }
+.pname { font: 700 18px/1.2 var(--cond); color: var(--navy); }
+.pts { font: 700 20px/1 var(--cond); color: var(--red); }
+.pool { display: inline-block; margin-left: 6px; font: 700 12px/1 var(--cond); border-radius: 3px; padding: 3px 5px; vertical-align: 2px; }
+.pool-A { background: var(--red); color: #fff; }
+.pool-B { background: var(--navy); color: #fff; }
+.tr-me td { background: #fff3c9; }
+.note { font-size: 14px; color: var(--muted); margin-top: 10px; }
 
-        .ribbon-a { background: var(--bandit-red); }
-        .ribbon-b { background: var(--bandit-navy); }
+/* ---------- leaders ---------- */
+.leaders { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (min-width: 700px) { .leaders { grid-template-columns: repeat(4, 1fr); } }
+.leader { background: var(--card); border: 1px solid var(--tan); border-radius: 10px; padding: 10px 12px; }
+.leader .pos { font: 600 14px/1.2 var(--cond); color: var(--muted); }
+.leader .who { font: 700 18px/1.2 var(--cond); color: var(--navy); }
+.leader .val { font: 600 15px/1.2 var(--cond); color: var(--red); }
 
-        .ribbon-text { 
-            color: white; 
-            font-weight: 900; 
-            font-size: 11px; 
-            font-family: sans-serif;
-            text-shadow: 0 1px 1px rgba(0,0,0,0.2);
-        }
+/* ---------- photos ---------- */
+.season { margin-bottom: 26px; }
+.season h3 { font: 400 22px/1.2 var(--display); color: var(--navy); margin: 0 0 10px; }
+.photos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (min-width: 700px) { .photos { grid-template-columns: repeat(3, 1fr); } }
+.photo { margin: 0; background: var(--card); border: 1px solid var(--tan); border-radius: 8px; padding: 6px; }
+.photo button { display: block; width: 100%; border: 0; padding: 0; background: var(--paper-deep); cursor: zoom-in; aspect-ratio: 4 / 3; border-radius: 4px; overflow: hidden; }
+.photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo figcaption { font: 600 15px/1.25 var(--cond); color: var(--navy); padding: 6px 2px 2px; }
+dialog.lightbox { border: 0; padding: 0; background: transparent; max-width: 96vw; max-height: 92vh; }
+dialog.lightbox::backdrop { background: rgba(20,28,36,.88); }
+dialog.lightbox img { max-width: 96vw; max-height: 80vh; display: block; border-radius: 6px; }
+dialog.lightbox p { color: var(--tan); text-align: center; font: 600 18px/1.3 var(--cond); margin: 10px 0 0; }
+dialog.lightbox .close { position: fixed; top: 12px; right: 12px; width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--card); font-size: 22px; cursor: pointer; }
 
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+/* ---------- info ---------- */
+.info h3 { font: 400 21px/1.2 var(--display); color: var(--red); margin: 0 0 8px; }
+.info p { margin: 0 0 10px; }
+.steps { margin: 0 0 10px; padding-left: 22px; }
+.steps li { margin-bottom: 6px; }
+.callout { background: var(--paper-deep); border-left: 4px solid var(--red); padding: 10px 12px; border-radius: 0 6px 6px 0; }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 16px; border-radius: 8px; border: 0; background: var(--red); color: #fff; font: 700 17px/1 var(--cond); letter-spacing: .02em; text-decoration: none; cursor: pointer; }
+.btn:hover { background: var(--red-dark); }
+.btn.ghost { background: transparent; color: var(--navy); border: 2px solid var(--tan); }
 
-        #admin-panel {
-            background: var(--bandit-navy);
-            border: 2px solid var(--vintage-tan);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
-    </style>
-    <!-- iOS Web App Support -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="GBU Curling">
-    <link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/10gkXR4l-Mifhhz2hevWdFM8TZiqoIe52">
+/* ---------- states ---------- */
+.state { text-align: center; padding: 48px 16px; color: var(--muted); }
+.spinner { width: 40px; height: 40px; margin: 0 auto 12px; border-radius: 50%; border: 4px solid var(--tan); border-top-color: var(--red); animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty { padding: 20px; text-align: center; color: var(--muted); background: var(--card); border: 1px dashed var(--tan); border-radius: 10px; }
+footer { max-width: 960px; margin: 8px auto 0; padding: 0 16px 16px; text-align: center; color: var(--muted); font-size: 13px; }
+
+/* ---------- admin ---------- */
+#admin { position: fixed; inset: 0; z-index: 100; background: rgba(20,28,36,.7); overflow-y: auto; }
+#admin[hidden] { display: none; }
+.admin-sheet { background: var(--navy); color: #fff; max-width: 640px; margin: 0 auto; min-height: 100%; border: 2px solid var(--tan); }
+@media (min-width: 700px) { .admin-sheet { margin: 32px auto; min-height: 0; border-radius: 10px; } }
+.admin-top { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--navy-dark); border-bottom: 2px solid var(--rope); }
+.admin-top h2 { margin: 0; font: 700 18px/1 var(--cond); color: var(--tan); letter-spacing: .03em; }
+.admin-top button { background: none; border: 0; color: #cdd5dc; cursor: pointer; min-height: 40px; padding: 0 8px; font: 600 15px/1 var(--cond); }
+.admin-body { padding: 16px; }
+.admin-body select { width: 100%; }
+.agame { background: var(--navy-dark); border: 1px solid rgba(255,255,255,.12); border-radius: 10px; margin-top: 12px; overflow: hidden; }
+.agame-head { display: flex; gap: 8px; align-items: center; padding: 6px 12px; background: rgba(0,0,0,.2); font: 600 13px/1 var(--cond); color: rgba(255,255,255,.5); }
+.agame-head .sh { flex: 1; color: var(--tan); font-size: 15px; }
+.agame-head span:not(.sh) { width: 64px; text-align: center; }
+.agame-head span.blank { width: 52px; }
+.arow { display: flex; gap: 8px; align-items: center; padding: 8px 12px; }
+.arow + .arow { border-top: 1px solid rgba(255,255,255,.06); }
+.arow .nm { flex: 1; min-width: 0; }
+.arow .nm b { display: block; font: 700 17px/1.2 var(--cond); }
+.arow .nm small { color: rgba(255,255,255,.5); font-size: 12px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.num { width: 64px; height: 44px; text-align: center; font: 700 20px/1 var(--cond); color: var(--navy); background: #fff; border: 2px solid var(--tan); border-radius: 6px; }
+.num.bad { border-color: #e0533d; background: #fde8e4; }
+.rbadge { width: 52px; text-align: center; font: 700 12px/1 var(--cond); padding: 6px 0; border-radius: 4px; background: rgba(255,255,255,.08); color: rgba(255,255,255,.4); }
+.rbadge.Win { background: var(--win); color: #fff; } .rbadge.Loss { background: var(--red); color: #fff; } .rbadge.Tie { background: var(--tan); color: var(--navy); }
+.admin-save { position: sticky; bottom: 0; display: flex; gap: 12px; align-items: center; padding: 12px 16px; background: var(--navy); border-top: 1px solid rgba(255,255,255,.12); margin: 16px -16px -16px; }
+.admin-save p { flex: 1; margin: 0; font-size: 14px; color: rgba(255,255,255,.75); }
+.admin-save p.err { color: #f7b4a8; }
+.pin { width: 100%; text-align: center; font: 700 28px/1 var(--cond); letter-spacing: .4em; padding: 10px; border-radius: 8px; border: 2px solid var(--tan); }
+.admin-help { font-size: 13px; color: rgba(255,255,255,.55); margin-top: 16px; }
+</style>
 </head>
-<body class="min-h-screen pb-12 font-sans text-sm">
+<body>
 
-    <!-- Announcement Banner -->
-    <div id="banner-container" class="announcement-banner bg-[#a63a2a] text-white py-2 overflow-hidden border-b-2 border-black sticky top-0 z-[60]" style="display: none;">
-        <div id="marquee-text" class="animate-marquee font-black uppercase tracking-widest text-[10px] sm:text-sm">
-            🚨 INITIALIZING... 🚨
-        </div>
+<div class="banner" id="banner" hidden><span id="banner-text"></span></div>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <button class="logo" id="logo" type="button" aria-label="League logo">
+      <img src="https://lh3.googleusercontent.com/d/10gkXR4l-Mifhhz2hevWdFM8TZiqoIe52" alt="" onerror="this.style.visibility='hidden'">
+    </button>
+    <div>
+      <h1>The Good, the Bad &amp; the Ugly Curling League</h1>
+      <p>Mondays 4:30–6:30 pm at the Whitby Curling Club</p>
     </div>
+  </div>
+</header>
 
-    <!-- Admin Panel -->
-    <div id="admin-panel" class="hidden fixed bottom-4 right-4 z-[100] w-72 rounded-lg p-4 text-white">
-        <div class="flex justify-between items-center mb-4 border-b border-white/20 pb-2">
-            <h3 class="font-black uppercase tracking-widest text-xs flex items-center gap-2">
-                <i class="fas fa-user-shield text-[#d9c5a0]"></i> Admin Info
-            </h3>
-            <button onclick="toggleAdminPanel()" class="text-white/50 hover:text-white"><i class="fas fa-times"></i></button>
+<nav class="nav" aria-label="Sections">
+  <button type="button" data-view="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</button>
+  <button type="button" data-view="schedule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Schedule</button>
+  <button type="button" data-view="standings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 21V11M12 21V4M19 21v-7"/></svg>Standings</button>
+  <button type="button" data-view="photos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="15" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M21 17l-5-5-9 8"/></svg>Photos</button>
+  <button type="button" data-view="info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>Info</button>
+</nav>
+
+<main>
+  <div id="loading" class="state"><div class="spinner"></div>Loading the schedule…</div>
+  <div id="load-error" class="state" hidden>
+    <p>The schedule didn't load. Check your connection and try again.</p>
+    <button class="btn" type="button" id="retry">Try again</button>
+  </div>
+
+  <!-- HOME -->
+  <section class="view" id="view-home" hidden aria-labelledby="home-h">
+    <h2 class="sr-only" id="home-h">Home</h2>
+    <div id="next-poster"></div>
+    <div class="stack">
+      <div class="panel">
+        <div class="picker">
+          <label for="me-home">Find your games</label>
+          <select id="me-home" class="me-select"></select>
         </div>
-        <div class="space-y-4">
-            <p class="text-[10px] uppercase font-bold leading-relaxed">
-                Banner control is live from "App Banner" sheet tab!
-            </p>
-            <div class="bg-black/20 p-2 rounded text-[9px] space-y-2 italic">
-                <p>A1: Checkbox (Visible)</p>
-                <p>A2: Your Message</p>
-            </div>
-            <p class="text-[8px] italic opacity-50 text-center">Note: Google Pub-to-Web can take 2-5 mins to update.</p>
-        </div>
+        <div id="my-next" style="margin-top:12px"></div>
+      </div>
+      <div id="next-games"></div>
+      <div>
+        <h2 class="section-title">Leaders</h2>
+        <div class="leaders" id="leaders"></div>
+      </div>
+      <div class="panel info">
+        <h3>Welcome</h3>
+        <p>We play at the <a href="https://www.whitbycurlingclub.com/" target="_blank" rel="noopener">Whitby Curling Club</a> every Monday from 4:30 to 6:30 pm, October through April. Our members are men from Durham Region and the surrounding area.</p>
+        <p>Teams are shuffled every four weeks, so you play with almost everyone over the season.</p>
+        <p style="margin:0">Want to join? Email <a href="mailto:gbanducurling@gmail.com">gbanducurling@gmail.com</a>.</p>
+      </div>
     </div>
+  </section>
 
-    <!-- Header -->
-    <header class="header-gradient text-white shadow-xl sticky top-[0px] z-50 sticky-nav-offset">
-        <div class="main-header-content max-w-5xl mx-auto px-4 py-4 sm:py-8 flex flex-row items-center justify-center gap-4 sm:gap-12">
-            <div onclick="handleLogoClick()" class="logo-container cursor-pointer w-20 h-20 sm:w-40 sm:h-40 rounded-full border-2 sm:border-8 border-[#d9c5a0] overflow-hidden bg-white shadow-2xl flex-shrink-0 active:scale-95 transition-transform">
-                <img id="league-logo" 
-                     src="https://lh3.googleusercontent.com/u/0/d/10gkXR4l-Mifhhz2hevWdFM8TZiqoIe52" 
-                     alt="League Logo" 
-                     class="w-full h-full object-cover"
-                     onerror="handleLogoError(this)">
-            </div>
-            
-            <div class="flex flex-col">
-                <h2 class="text-xl sm:text-4xl font-black uppercase tracking-widest text-[#d9c5a0] leading-tight text-center sm:text-left">
-                    The Good, The Bad, & The Ugly <br class="hidden sm:block"> Curling League
-                </h2>
-            </div>
+  <!-- SCHEDULE -->
+  <section class="view" id="view-schedule" hidden aria-labelledby="sched-h">
+    <h2 class="sr-only" id="sched-h">Schedule</h2>
+    <div class="seg" role="group" aria-label="Schedule view">
+      <button type="button" data-mode="week" aria-pressed="true">By week</button>
+      <button type="button" data-mode="mine" aria-pressed="false">My games</button>
+      <button type="button" data-mode="playoffs" aria-pressed="false" hidden>Playoffs</button>
+    </div>
+    <div id="mode-week">
+      <div class="weekbar">
+        <button class="arrow" type="button" id="prev-week" aria-label="Previous week">‹</button>
+        <div class="label" aria-live="polite"><strong id="week-date"></strong><span id="week-sub"></span></div>
+        <button class="arrow" type="button" id="next-week" aria-label="Next week">›</button>
+      </div>
+      <div class="chips" id="chips" role="list"></div>
+      <div class="games" id="week-games"></div>
+    </div>
+    <div id="mode-mine" hidden>
+      <div class="picker" style="margin-bottom:12px">
+        <label for="me-sched">Show games for</label>
+        <select id="me-sched" class="me-select"></select>
+      </div>
+      <div id="my-games"></div>
+    </div>
+    <div id="mode-playoffs" hidden><div class="games" id="playoff-games"></div></div>
+  </section>
+
+  <!-- STANDINGS -->
+  <section class="view" id="view-standings" hidden aria-labelledby="stand-h">
+    <h2 class="section-title" id="stand-h">Standings</h2>
+    <div class="seg" role="group" aria-label="Position">
+      <button type="button" data-pos="Skip" aria-pressed="true">Skips</button>
+      <button type="button" data-pos="Vice" aria-pressed="false">Vices</button>
+      <button type="button" data-pos="Second" aria-pressed="false">Seconds</button>
+      <button type="button" data-pos="Lead" aria-pressed="false">Leads</button>
+    </div>
+    <table class="table">
+      <thead><tr><th scope="col"><span class="sr-only">Rank</span>#</th><th scope="col">Player</th><th scope="col">GP</th><th scope="col">Ends</th><th scope="col">Pts</th></tr></thead>
+      <tbody id="standings-body"></tbody>
+    </table>
+    <p class="note">Win 2 points, tie 1, loss 0. Everyone on a team gets the team's points and ends won. Ties in points are broken by ends won. A and B show which playoff pool you'd be in today.</p>
+  </section>
+
+  <!-- PHOTOS -->
+  <section class="view" id="view-photos" hidden aria-labelledby="photos-h">
+    <h2 class="section-title" id="photos-h">Champions</h2>
+    <div id="photo-list"></div>
+  </section>
+
+  <!-- INFO -->
+  <section class="view info" id="view-info" hidden aria-labelledby="info-h">
+    <h2 class="section-title" id="info-h">League info</h2>
+    <div class="grid-2">
+      <div class="panel">
+        <h3>When and where</h3>
+        <p>Every Monday, 4:30 to 6:30 pm, October through April.</p>
+        <p><a href="https://www.whitbycurlingclub.com/" target="_blank" rel="noopener">Whitby Curling Club</a></p>
+        <h3 style="margin-top:18px">How teams work</h3>
+        <p>Each season has 5 rounds of 4 games. Teams are reshuffled at the start of every round, and every team is known by its skip.</p>
+        <p style="margin:0">A win is worth 2 points and a tie 1. Every player on the team gets the points and ends won, and the standings are kept by position.</p>
+      </div>
+      <div class="panel" id="spare">
+        <h3>Missing a game?</h3>
+        <p class="callout">Let Jeff Sisson know as soon as you can. His number and email are in the weekly league emails.</p>
+        <ol class="steps">
+          <li>Text Jeff your name and the date or dates you'll miss.</li>
+          <li>No cell phone? Email him the same details.</li>
+          <li>Can't text or email? Call and leave a message.</li>
+        </ol>
+        <p style="margin:0">Jeff lines up spares as absences come in. If a spot can't be filled, players are moved between teams so no team has fewer than 3 and no game is cancelled.</p>
+      </div>
+      <div class="panel">
+        <h3>Contact</h3>
+        <p>Membership and general questions:</p>
+        <a class="btn" href="mailto:gbanducurling@gmail.com">Email the league</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>Whitby, Ontario</footer>
+
+<dialog class="lightbox" id="lightbox">
+  <button class="close" type="button" aria-label="Close photo">✕</button>
+  <img id="lightbox-img" alt="">
+  <p id="lightbox-cap"></p>
+</dialog>
+
+<!-- Admin: tap the logo 5 times -->
+<div id="admin" hidden>
+  <div class="admin-sheet" role="dialog" aria-modal="true" aria-labelledby="admin-h">
+    <div class="admin-top">
+      <h2 id="admin-h">Enter scores</h2>
+      <div>
+        <button type="button" id="admin-lock" hidden>Lock</button>
+        <button type="button" id="admin-close" aria-label="Close">✕</button>
+      </div>
+    </div>
+    <div class="admin-body">
+      <form id="admin-login" style="max-width:280px;margin:12px auto;text-align:center">
+        <label for="admin-pin" style="display:block;font:600 16px/1.2 var(--cond);color:var(--tan);margin-bottom:10px">Admin PIN</label>
+        <input id="admin-pin" class="pin" type="password" inputmode="numeric" autocomplete="current-password">
+        <button class="btn" type="submit" style="width:100%;margin-top:12px">Unlock</button>
+        <p id="admin-login-msg" style="color:#f7b4a8;min-height:1.2em;font-size:14px"></p>
+      </form>
+      <div id="admin-entry" hidden>
+        <label for="admin-week" class="sr-only">Week</label>
+        <select id="admin-week"></select>
+        <div id="admin-games"></div>
+        <div class="admin-save">
+          <p id="admin-msg" aria-live="polite"></p>
+          <button class="btn" type="button" id="admin-save-btn">Save week</button>
         </div>
-        
-        <div class="max-w-5xl mx-auto flex bg-[#1a252f] border-x border-[#1a252f] overflow-x-auto no-scrollbar">
-            <button onclick="switchTab('schedule')" id="tab-schedule" class="tab-btn flex-1 py-3 sm:py-4 text-[9px] sm:text-xs font-black uppercase tracking-widest text-[#d9c5a0] transition-all min-w-[80px]">Schedule</button>
-            <button onclick="switchTab('playoffs')" id="tab-playoffs" class="tab-btn flex-1 py-3 sm:py-4 text-[9px] sm:text-xs font-black uppercase tracking-widest text-[#d9c5a0] transition-all min-w-[80px]">Playoffs</button>
-            <button onclick="switchTab('standings')" id="tab-standings" class="tab-btn flex-1 py-3 sm:py-4 text-[9px] sm:text-xs font-black uppercase tracking-widest text-[#d9c5a0] active-tab transition-all min-w-[80px]">Standings</button>
-            <button onclick="switchTab('info')" id="tab-info" class="tab-btn flex-1 py-3 sm:py-4 text-[9px] sm:text-xs font-black uppercase tracking-widest text-[#d9c5a0] transition-all min-w-[80px]">Info</button>
-        </div>
-    </header>
+        <p class="admin-help">Results are worked out from the scores: win 2, tie 1, loss 0. Leave both scores on a sheet blank and save to clear that game. The banner lives in the App Banner tab: checkbox in A1, message in A2.</p>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <main class="max-w-5xl mx-auto p-4 sm:p-6">
-        <div id="loading" class="flex flex-col items-center justify-center mt-20">
-            <div class="loading-spinner"></div>
-            <p class="mt-4 text-[#735338] font-bold italic uppercase text-[10px] tracking-widest">Polishing the Stones...</p>
-        </div>
+<script>
+// The league sheet's Apps Script web app (Deploy → Manage deployments → Web app URL).
+const API_URL = "https://script.google.com/macros/s/AKfycbzCIptDOP3SHQdufPHVDD-3sEO_m1go0lULOTkz-AD0Cvt7qybZA43wrjSOgQ7XAoKm/exec";
+const POSITIONS = ["Skip", "Vice", "Second", "Lead"];
+const PLURAL = { Skip: "Skips", Vice: "Vices", Second: "Seconds", Lead: "Leads" };
 
-        <!-- Schedule View -->
-        <div id="schedule-view" class="hidden view-schedule space-y-4">
-            <div id="date-select-container" class="max-w-md mx-auto relative mt-2">
-                <select id="date-select" onchange="filterScheduleByDate(this.value)" class="w-full bg-white border-2 border-[#d9c5a0] rounded-lg px-4 py-2 font-black text-[#2d3e50] shadow-sm focus:ring-2 focus:ring-[#a63a2a] outline-none uppercase text-xs cursor-pointer">
-                </select>
-            </div>
-            
-            <div id="round-banner" class="hidden max-w-xs mx-auto bg-[#a63a2a] border border-[#735338] rounded p-1.5 text-center">
-                <span id="round-text" class="text-[10px] font-black text-white uppercase tracking-widest italic"></span>
-            </div>
-            
-            <div id="schedule-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2"></div>
-        </div>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k); } catch (e) {} },
+};
 
-        <!-- Playoffs View -->
-        <div id="playoffs-view" class="hidden view-playoffs space-y-4">
-            <div id="playoff-date-select-container" class="max-w-md mx-auto relative mt-2">
-                <select id="playoff-date-select" onchange="filterPlayoffsByDate(this.value)" class="w-full bg-white border-2 border-[#d9c5a0] rounded-lg px-4 py-2 font-black text-[#2d3e50] shadow-sm focus:ring-2 focus:ring-[#a63a2a] outline-none uppercase text-xs cursor-pointer">
-                </select>
-            </div>
-            
-            <div id="playoff-round-banner" class="hidden max-w-xs mx-auto bg-[#a63a2a] border border-[#735338] rounded p-1.5 text-center">
-                <span id="playoff-round-text" class="text-[10px] font-black text-white uppercase tracking-widest italic"></span>
-            </div>
-            
-            <div id="playoffs-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2"></div>
-        </div>
+let DATA = null;          // raw payload
+let WEEKS = [];           // [{week, date: Date, iso, round, game, games: [{sheet, teams:[t,t]}], done}]
+let currentWeek = 1;
+let me = store.get("gbuMe") || "";
+let standPos = "Skip";
 
-        <!-- Standings View -->
-        <div id="standings-view" class="hidden view-standings space-y-4">
-            <div class="flex flex-nowrap overflow-x-auto no-scrollbar justify-start sm:justify-center gap-2 pb-1" id="pos-tabs">
-                <button onclick="filterStandings('Skip')" id="btn-Skip" class="pos-tab whitespace-nowrap px-4 py-2 rounded bg-[#2d3e50] text-white text-[9px] sm:text-xs font-black uppercase tracking-widest border-b-2 border-[#1a252f] flex-shrink-0">Skips</button>
-                <button onclick="filterStandings('Vice')" id="btn-Vice" class="pos-tab whitespace-nowrap px-4 py-2 rounded bg-white border border-[#d9c5a0] text-[#735338] text-[9px] sm:text-xs font-black uppercase tracking-widest border-b-2 flex-shrink-0">Vices</button>
-                <button onclick="filterStandings('Second')" id="btn-Second" class="pos-tab whitespace-nowrap px-4 py-2 rounded bg-white border border-[#d9c5a0] text-[#735338] text-[9px] sm:text-xs font-black uppercase tracking-widest border-b-2 flex-shrink-0">Seconds</button>
-                <button onclick="filterStandings('Lead')" id="btn-Lead" class="pos-tab whitespace-nowrap px-4 py-2 rounded bg-white border border-[#d9c5a0] text-[#735338] text-[9px] sm:text-xs font-black uppercase tracking-widest border-b-2 flex-shrink-0">Leads</button>
-            </div>
-            <div id="standings-list" class="flex flex-col gap-3 max-w-xl mx-auto"></div>
-        </div>
+/* ---------------- data ---------------- */
+function parseISO(s) { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ""); return m ? new Date(+m[1], m[2] - 1, +m[3]) : null; }
+function today() { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }
+const fmtLong = d => d ? d.toLocaleDateString("en-CA", { weekday: "long", month: "long", day: "numeric" }) : "Date to be set";
+const fmtShort = d => d ? d.toLocaleDateString("en-CA", { month: "short", day: "numeric" }) : "TBD";
 
-        <!-- Information View -->
-        <div id="info-view" class="hidden view-info p-4 sm:p-10 bg-white border border-[#d9c5a0]">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="space-y-6">
-                    <section>
-                        <h3 class="text-lg font-black uppercase tracking-widest text-[#a63a2a] border-b-2 border-[#d9c5a0] pb-1 mb-3">League Info</h3>
-                        <p class="text-sm leading-relaxed text-[#2d3e50]">
-                            Plays out of the <span class="font-black text-[#735338]">Whitby Curling Club</span> every Monday from <span class="font-black italic">4:30 - 6:30 PM</span>.
-                        </p>
-                    </section>
-                    <section>
-                        <h3 class="text-lg font-black uppercase tracking-widest text-[#a63a2a] border-b-2 border-[#d9c5a0] pb-1 mb-3">Contact</h3>
-                        <a href="mailto:gbanducurling@gmail.com" class="text-base font-black text-[#a63a2a] hover:underline">gbanducurling@gmail.com</a>
-                    </section>
-                </div>
-                <section>
-                    <h3 class="text-lg font-black uppercase tracking-widest text-[#a63a2a] border-b-2 border-[#d9c5a0] pb-1 mb-3">Absences</h3>
-                    <div class="space-y-4 text-xs sm:text-sm text-[#2d3e50]">
-                        <p class="font-bold text-[#735338] bg-[#f4eee1] p-2 border-l-4 border-[#a63a2a]">Contact Jeff Sisson ASAP if missing a game:</p>
-                        <ul class="space-y-2">
-                            <li class="flex gap-2"><b>1.</b> Text Jeff with your name & game date.</li>
-                            <li class="flex gap-2"><b>2.</b> Email if no cell phone available.</li>
-                            <li class="flex gap-2"><b>3.</b> Call and leave a message if needed.</li>
-                        </ul>
-                    </div>
-                </section>
-            </div>
-        </div>
-    </main>
+async function fetchJSON(url, tries = 3) {
+  let wait = 800;
+  for (let i = 0; i < tries; i++) {
+    try {
+      const r = await fetch(url, { cache: "no-store" });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const j = await r.json();
+      if (!j.ok) throw new Error(j.error || "Bad response");
+      return j;
+    } catch (e) { if (i === tries - 1) throw e; await new Promise(r => setTimeout(r, wait)); wait *= 2; }
+  }
+}
 
-    <footer class="max-w-5xl mx-auto px-6 py-8 text-center text-[#735338] text-[9px] font-bold uppercase tracking-widest opacity-60">
-        Whitby, Ontario • Established 2025
-    </footer>
+function buildWeeks(games) {
+  const map = new Map();
+  games.forEach(g => {
+    if (!g.week) return;
+    if (!map.has(g.week)) map.set(g.week, { week: g.week, iso: g.date, date: parseISO(g.date), round: g.round, game: g.game, sheets: new Map() });
+    const w = map.get(g.week);
+    if (!w.sheets.has(g.sheet)) w.sheets.set(g.sheet, []);
+    w.sheets.get(g.sheet).push(g);
+  });
+  return [...map.values()].sort((a, b) => a.week - b.week).map(w => {
+    const gs = [...w.sheets.entries()].sort((a, b) => (parseInt(a[0]) || 0) - (parseInt(b[0]) || 0)).map(([sheet, teams]) => ({ sheet, teams }));
+    const all = gs.flatMap(g => g.teams);
+    return { week: w.week, iso: w.iso, date: w.date, round: w.round, game: w.game, games: gs, done: all.length > 0 && all.every(t => t.result) };
+  });
+}
 
-    <script>
-        const SCHEDULE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQz2JZi041jr2rlFvlOzMT-q_eD2JwHqgsAWNOtc07pzCH89pxV15O-HmNLz_gXDQ2CXjBFQPgbAcU2/pub?gid=2053038258&single=true&output=csv";
-        const STANDINGS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQz2JZi041jr2rlFvlOzMT-q_eD2JwHqgsAWNOtc07pzCH89pxV15O-HmNLz_gXDQ2CXjBFQPgbAcU2/pub?gid=1570496540&single=true&output=csv";
-        const PLAYOFF_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQz2JZi041jr2rlFvlOzMT-q_eD2JwHqgsAWNOtc07pzCH89pxV15O-HmNLz_gXDQ2CXjBFQPgbAcU2/pub?gid=2018113935&single=true&output=csv";
-        const BANNER_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQz2JZi041jr2rlFvlOzMT-q_eD2JwHqgsAWNOtc07pzCH89pxV15O-HmNLz_gXDQ2CXjBFQPgbAcU2/pub?gid=2074558277&single=true&output=csv";
+function nextWeekIndex() {
+  const t = today();
+  const i = WEEKS.findIndex(w => w.date && w.date >= t && !w.done);
+  if (i !== -1) return i;
+  const j = WEEKS.findIndex(w => !w.done);
+  return j !== -1 ? j : WEEKS.length - 1;
+}
 
-        let allGames = {};
-        let allPlayoffs = {};
-        let allStandings = { Skip: [], Vice: [], Second: [], Lead: [] };
-        let masterRosters = {}; 
-        let highestCompletedRound = 0;
-        let logoClicks = 0;
-        let clickTimer;
+function allPlayers() {
+  const set = new Set();
+  (DATA.games || []).forEach(g => POSITIONS.forEach(p => { const n = g[p.toLowerCase()]; if (n) set.add(n); }));
+  return [...set].sort((a, b) => a.split(" ").slice(-1)[0].localeCompare(b.split(" ").slice(-1)[0]) || a.localeCompare(b));
+}
 
-        async function fetchWithRetry(url, retries = 3, delay = 1000) {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(url, { method: 'GET', cache: 'no-store' });
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    return await response.text();
-                } catch (e) {
-                    if (i === retries - 1) throw e;
-                    await new Promise(res => setTimeout(res, delay));
-                    delay *= 2; 
-                }
-            }
-        }
+/* ---------------- rendering helpers ---------------- */
+const isMe = n => me && n === me;
+const nameHtml = n => isMe(n) ? `<span class="me">${esc(n)}</span>` : esc(n);
 
-        function handleLogoClick() {
-            logoClicks++;
-            clearTimeout(clickTimer);
-            if (logoClicks === 5) { toggleAdminPanel(); logoClicks = 0; } 
-            else { clickTimer = setTimeout(() => { logoClicks = 0; }, 2000); }
-        }
+function teamHtml(t) {
+  const res = t.result ? `<div class="result"><span class="badge b-${esc(t.result)}">${esc(t.result.toUpperCase())}</span><div class="score">${esc(t.score)}</div><div class="ends">${esc(t.ends)} ends</div></div>` : "";
+  return `<div class="team">
+    <div class="team-names">
+      <div class="skip">${nameHtml(t.skip)}</div>
+      <div class="crew"><span class="nw">Vice <b>${nameHtml(t.vice)}</b></span><br><span class="nw">Second <b>${nameHtml(t.second)}</b></span> <span class="nw">Lead <b>${nameHtml(t.lead)}</b></span></div>
+    </div>${res}
+  </div>`;
+}
+function gameHtml(g, label) {
+  return `<article class="game"><div class="game-head"><span>${esc(label || "Sheet " + g.sheet)}</span></div>${g.teams.map(teamHtml).join("")}</article>`;
+}
 
-        function toggleAdminPanel() {
-            const panel = document.getElementById('admin-panel');
-            panel.classList.toggle('hidden');
-        }
+/* ---------------- home ---------------- */
+function renderHome() {
+  const box = $("next-poster");
+  if (!WEEKS.length) { box.innerHTML = `<div class="empty">The schedule for this season hasn't been posted yet.</div>`; $("next-games").innerHTML = ""; renderMyNext(); renderLeaders(); return; }
+  const idx = nextWeekIndex();
+  const w = WEEKS[idx];
+  const allDone = WEEKS.every(x => x.done);
+  let count = "";
+  if (w.date) {
+    const days = Math.round((w.date - today()) / 86400000);
+    count = days === 0 ? "Tonight at 4:30" : days === 1 ? "Tomorrow at 4:30" : days > 1 ? `In ${days} days` : "";
+  }
+  box.innerHTML = `
+    <div class="poster">
+      <div class="kicker">${allDone ? "Season complete" : "Next game"}</div>
+      <div class="when">${allDone ? "See you in October" : esc(fmtLong(w.date))}</div>
+      <div class="sub">${allDone ? "Final standings are on the Standings page." : `Round ${w.round}, Game ${w.game} &nbsp;|&nbsp; Week ${w.week} of ${WEEKS.length}`}</div>
+      ${count && !allDone ? `<div class="count">${count}</div>` : ""}
+    </div>`;
+  $("next-games").innerHTML = allDone ? "" : `<h2 class="section-title">This week's games</h2><div class="games">${w.games.map(g => gameHtml(g)).join("")}</div>`;
+  renderMyNext();
+  renderLeaders();
+}
 
-        async function initBanner() {
-            try {
-                const csvData = await fetchWithRetry(BANNER_URL).catch(() => null);
-                if (!csvData) { hideBannerUI(); return; }
-                const rows = Papa.parse(csvData, { header: false, skipEmptyLines: false }).data;
-                if (!rows || rows.length === 0) { hideBannerUI(); return; }
-                const rawA1 = (rows[0] && rows[0][0]) ? rows[0][0].toString().trim() : "";
-                const valA1 = rawA1.toUpperCase();
-                const isVisible = (valA1 === 'TRUE' || valA1 === '1' || valA1 === 'YES' || valA1 === 'ON' || valA1 === '☑' || valA1 === 'CHECKED');
-                const bannerText = (rows[1] && rows[1][0]) ? rows[1][0].trim() : "";
-                const marquee = document.getElementById('marquee-text');
-                const container = document.getElementById('banner-container');
-                const header = document.querySelector('header');
-                if (isVisible && bannerText !== "") {
-                    marquee.innerHTML = `🚨 ${bannerText} 🚨`;
-                    container.style.display = 'block';
-                    header.style.top = (window.innerWidth < 640 ? '28px' : '36px');
-                } else { hideBannerUI(); }
-            } catch (e) { hideBannerUI(); }
-        }
+function myGames() {
+  if (!me) return [];
+  return WEEKS.map(w => {
+    for (const g of w.games) {
+      const i = g.teams.findIndex(t => POSITIONS.some(p => t[p.toLowerCase()] === me));
+      if (i !== -1) return { w, g, mine: g.teams[i], them: g.teams[1 - i] };
+    }
+    return { w, g: null };
+  });
+}
 
-        function hideBannerUI() {
-            const container = document.getElementById('banner-container');
-            const header = document.querySelector('header');
-            if (container) container.style.display = 'none';
-            if (header) header.style.top = '0px';
-        }
+function renderMyNext() {
+  const box = $("my-next");
+  if (!me) { box.innerHTML = `<p style="margin:0;color:var(--muted)">Pick your name to see your sheet, teammates and opponent each week.</p>`; return; }
+  const list = myGames();
+  const idx = nextWeekIndex();
+  const n = list[idx];
+  if (!n || !n.g) { box.innerHTML = `<p style="margin:0">You're not on the schedule for week ${WEEKS[idx]?.week}.</p>`; return; }
+  const pos = POSITIONS.find(p => n.mine[p.toLowerCase()] === me);
+  const mates = POSITIONS.filter(p => p !== pos).map(p => `${p} ${esc(n.mine[p.toLowerCase()])}`).join(", ");
+  box.innerHTML = `<p style="margin:0 0 6px"><strong>${esc(fmtLong(n.w.date))}: Sheet ${esc(n.g.sheet)}</strong>, playing ${pos.toLowerCase()} against <strong>${esc(n.them?.skip || "a bye")}</strong>'s team.</p>
+    <p style="margin:0 0 10px;color:var(--muted);font-size:15px">With ${mates}.</p>
+    <button class="btn ghost" type="button" onclick="showView('schedule');setMode('mine')">See all my games</button>`;
+}
 
-        function handleLogoError(img) {
-            img.src = 'https://placehold.co/200x200/2d3e50/d9c5a0?text=GBU';
-        }
+function renderLeaders() {
+  const st = DATA.standings || [];
+  const played = st.some(p => p.games > 0);
+  $("leaders").innerHTML = POSITIONS.map(pos => {
+    const top = st.filter(p => p.position === pos).sort(sortStand)[0];
+    return `<div class="leader"><div class="pos">${PLURAL[pos]}</div><div class="who">${played && top ? esc(top.name) : "—"}</div><div class="val">${played && top ? `${top.points} pts, ${top.ends} ends` : "No games yet"}</div></div>`;
+  }).join("");
+}
 
-        async function loadAppData() {
-            try {
-                const [schRaw, stdRaw] = await Promise.all([
-                    fetchWithRetry(SCHEDULE_URL),
-                    fetchWithRetry(STANDINGS_URL)
-                ]);
+/* ---------------- schedule ---------------- */
+function renderChips() {
+  $("chips").innerHTML = WEEKS.map(w => `<button type="button" class="chip${w.done ? " done" : ""}" role="listitem" data-week="${w.week}" aria-current="${w.week === currentWeek}" aria-label="Week ${w.week}, ${fmtShort(w.date)}${w.done ? ", scores in" : ""}"><b>Wk ${w.week}</b><small>${fmtShort(w.date)}</small></button>`).join("");
+}
+function renderWeek() {
+  const w = WEEKS.find(x => x.week === currentWeek);
+  if (!w) { $("week-games").innerHTML = `<div class="empty">No games posted yet.</div>`; return; }
+  $("week-date").textContent = fmtLong(w.date);
+  $("week-sub").textContent = `Week ${w.week} of ${WEEKS.length}, Round ${w.round} Game ${w.game}`;
+  $("prev-week").disabled = w.week === WEEKS[0].week;
+  $("next-week").disabled = w.week === WEEKS[WEEKS.length - 1].week;
+  $("week-games").innerHTML = w.games.map(g => gameHtml(g)).join("");
+  document.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-current", +c.dataset.week === currentWeek));
+  const cur = document.querySelector(`.chip[data-week="${currentWeek}"]`);
+  if (cur && cur.scrollIntoView) cur.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+}
+function goWeek(n) { currentWeek = n; renderWeek(); }
 
-                let plyRaw = "";
-                try { plyRaw = await fetchWithRetry(PLAYOFF_URL); } catch (e) {}
+function renderMine() {
+  const box = $("my-games");
+  if (!me) { box.innerHTML = `<div class="empty">Pick your name above to see all of your games.</div>`; return; }
+  const next = WEEKS[nextWeekIndex()]?.week;
+  box.innerHTML = `<ul class="mylist">${myGames().map(({ w, g, mine, them }) => {
+    const d = w.date;
+    const dateCell = `<div class="mydate">${d ? d.toLocaleDateString("en-CA", { month: "short" }) : "TBD"}<span>${d ? d.getDate() : ""}</span></div>`;
+    if (!g) return `<li class="myrow">${dateCell}<div class="myteam">Not scheduled</div><div></div></li>`;
+    const pos = POSITIONS.find(p => mine[p.toLowerCase()] === me);
+    const mates = POSITIONS.filter(p => p !== pos).map(p => esc(mine[p.toLowerCase()])).join(", ");
+    const res = mine.result ? `<div class="result"><span class="badge b-${esc(mine.result)}">${esc(mine.result.toUpperCase())}</span><div class="ends">${esc(mine.score)}–${esc(them?.score ?? "")}</div></div>` : `<div class="result" style="font:700 16px/1 var(--cond);color:var(--rope)">Sheet ${esc(g.sheet)}</div>`;
+    return `<li class="myrow${w.week === next ? " next" : ""}">${dateCell}<div class="myteam"><div class="vs">vs ${esc(them?.skip || "bye")}</div>${pos} with ${mates}</div>${res}</li>`;
+  }).join("")}</ul>`;
+}
 
-                processStandings(Papa.parse(stdRaw, { header: true, skipEmptyLines: true }).data);
-                processSchedule(Papa.parse(schRaw, { header: false, skipEmptyLines: true }).data);
-                if (plyRaw) processPlayoffs(Papa.parse(plyRaw, { header: false, skipEmptyLines: true }).data);
+function playoffRows() {
+  const rows = (DATA.playoffs || []).slice(1).filter(r => r && r[4] && !String(r[4]).startsWith("#"));
+  const byDate = new Map();
+  rows.forEach(r => {
+    const key = r[0];
+    if (!byDate.has(key)) byDate.set(key, new Map());
+    const sheets = byDate.get(key);
+    const sk = `${r[1]} ${r[2]} | ${r[3]}`;
+    if (!sheets.has(sk)) sheets.set(sk, { label: `${r[3]} · ${r[1]} ${r[2]}`, teams: [] });
+    const ok = v => (v && !String(v).startsWith("#")) ? v : "";
+    sheets.get(sk).teams.push({ skip: r[4], vice: r[5], second: r[6], lead: r[7], score: ok(r[8]), ends: ok(r[9]), result: ok(r[10]) });
+  });
+  return byDate;
+}
+function renderPlayoffs() {
+  const byDate = playoffRows();
+  const btn = document.querySelector('[data-mode="playoffs"]');
+  btn.hidden = byDate.size === 0;
+  $("playoff-games").innerHTML = [...byDate.entries()].map(([date, sheets]) =>
+    `<h3 class="section-title" style="grid-column:1/-1;font-size:22px;margin:6px 0 0">${esc(date)}</h3>` +
+    [...sheets.values()].map(g => gameHtml(g, g.label)).join("")).join("");
+}
 
-                document.getElementById('loading').classList.add('hidden');
-                
-                // NEW: Default to Playoffs tab and April 6 date
-                switchTab('playoffs'); 
-                const playSelect = document.getElementById('playoff-date-select');
-                if (playSelect) {
-                    const april6Option = Array.from(playSelect.options).find(opt => opt.value.includes("April 6") || opt.value.includes("04/06"));
-                    if (april6Option) {
-                        playSelect.value = april6Option.value;
-                        filterPlayoffsByDate(april6Option.value);
-                    }
-                }
+function setMode(mode) {
+  document.querySelectorAll("[data-mode]").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === mode));
+  ["week", "mine", "playoffs"].forEach(m => $("mode-" + m).hidden = m !== mode);
+  if (mode === "mine") renderMine();
+  if (mode === "week") renderWeek();
+}
 
-                initBanner();
-            } catch (e) {
-                document.getElementById('loading').innerHTML = `<div class="text-red-800 text-center p-10 font-black uppercase italic">Connection Error</div>`;
-            }
-        }
+/* ---------------- standings ---------------- */
+const sortStand = (a, b) => b.points - a.points || b.ends - a.ends || a.name.localeCompare(b.name);
+function renderStandings() {
+  document.querySelectorAll("[data-pos]").forEach(b => b.setAttribute("aria-pressed", b.dataset.pos === standPos));
+  const list = (DATA.standings || []).filter(p => p.position === standPos).sort(sortStand);
+  const played = list.some(p => p.games > 0);
+  if (!list.length) { $("standings-body").innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted)">No players yet.</td></tr>`; return; }
+  $("standings-body").innerHTML = list.map((p, i) => {
+    const pool = !played ? "" : i < 4 ? `<span class="pool pool-A" title="Pool A">A</span>` : i < 8 ? `<span class="pool pool-B" title="Pool B">B</span>` : "";
+    return `<tr class="${isMe(p.name) ? "tr-me" : ""}"><td class="rank">${i + 1}</td><td><span class="pname">${esc(p.name)}</span>${pool}</td><td>${p.games}</td><td>${p.ends}</td><td class="pts">${p.points}</td></tr>`;
+  }).join("");
+}
 
-        function processStandings(data) {
-            allStandings = { Skip: [], Vice: [], Second: [], Lead: [] };
-            data.forEach(row => {
-                const vals = Object.values(row);
-                const pos = (vals[0] || "").trim();
-                const name = (vals[1] || "").trim();
-                if (!name || pos === "Position") return;
-                let category = pos.includes("Skip") ? "Skip" : (pos.includes("Vice") || pos.includes("Third") ? "Vice" : (pos.includes("Second") ? "Second" : (pos.includes("Lead") ? "Lead" : "")));
-                if (category) allStandings[category].push({ name, ends: parseFloat(vals[2] || "0"), pts: parseFloat(vals[3] || "0") });
-            });
-        }
+/* ---------------- photos ---------------- */
+function renderPhotos() {
+  const photos = DATA.photos || [];
+  if (!photos.length) { $("photo-list").innerHTML = `<div class="empty">No photos yet.</div>`; return; }
+  const seasons = new Map();
+  photos.forEach(p => { if (!seasons.has(p.season)) seasons.set(p.season, []); seasons.get(p.season).push(p); });
+  const order = [...seasons.keys()].sort((a, b) => b.localeCompare(a));
+  $("photo-list").innerHTML = order.map(s => `<section class="season"><h3>${esc(s)}</h3><div class="photos">${seasons.get(s).map(p =>
+    `<figure class="photo"><button type="button" data-src="${esc(p.url)}" data-cap="${esc(s + " " + p.caption)}"><img src="${esc(p.url)}" alt="${esc(p.caption)}, ${esc(s)}" loading="lazy" referrerpolicy="no-referrer"></button><figcaption>${esc(p.caption)}</figcaption></figure>`).join("")}</div></section>`).join("");
+}
 
-        function processSchedule(rows) {
-            allGames = {};
-            masterRosters = {};
-            for (let i = 1; i < rows.length; i++) {
-                const row = rows[i];
-                if (!row || row.length < 5) continue;
-                const [date, roundStr, gameNumStr, sheetRaw, skip, vice, second, lead, score, endsWon, result] = row;
-                if (!date || date.toLowerCase() === "date" || !sheetRaw) continue;
-                if (skip) masterRosters[skip.trim().toLowerCase()] = { vice: (vice||"").trim(), second: (second||"").trim(), lead: (lead||"").trim() };
-                if (!allGames[date]) allGames[date] = {};
-                const sheetId = sheetRaw.toLowerCase().replace("sheet", "").trim();
-                if (!allGames[date][sheetId]) allGames[date][sheetId] = { sheetDisplay: sheetRaw, round: parseInt(roundStr), gameNum: parseInt(gameNumStr), teams: [] };
-                allGames[date][sheetId].teams.push({ skip, vice, second, lead, score, endsWon, result });
-                if (parseInt(gameNumStr) === 4 && result && parseInt(roundStr) > highestCompletedRound) highestCompletedRound = parseInt(roundStr);
-            }
-            const dates = Object.keys(allGames).sort((a, b) => new Date(a) - new Date(b));
-            const select = document.getElementById('date-select');
-            if (select) {
-                select.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join('');
-                filterScheduleByDate(dates[0]);
-            }
-        }
+/* ---------------- banner ---------------- */
+function renderBanner() {
+  const b = DATA.banner || {};
+  $("banner").hidden = !(b.show && b.text);
+  $("banner-text").textContent = b.text || "";
+}
 
-        function processPlayoffs(rows) {
-            allPlayoffs = {};
-            for (let i = 1; i < rows.length; i++) {
-                const row = rows[i];
-                if (!row || row.length < 5) continue;
-                const [date, roundStr, gameNumStr, sheetRaw, skip, vice, second, lead, score, endsWon, result] = row;
-                if (!date || date.toLowerCase() === "date" || !sheetRaw) continue;
-                if (skip && (vice||"").trim()) masterRosters[skip.trim().toLowerCase()] = { vice: (vice||"").trim(), second: (second||"").trim(), lead: (lead||"").trim() };
-                if (!allPlayoffs[date]) allPlayoffs[date] = {};
-                const sheetId = sheetRaw.toLowerCase().replace("sheet", "").trim();
-                if (!allPlayoffs[date][sheetId]) allPlayoffs[date][sheetId] = { sheetDisplay: sheetRaw, round: roundStr, gameNum: gameNumStr, teams: [] };
-                allPlayoffs[date][sheetId].teams.push({ skip, vice, second, lead, score, endsWon, result });
-            }
-            const dates = Object.keys(allPlayoffs).sort((a, b) => new Date(a) - new Date(b));
-            const select = document.getElementById('playoff-date-select');
-            if (select) {
-                select.innerHTML = dates.map(d => `<option value="${d}">${d}</option>`).join('');
-                if (dates.length > 0) filterPlayoffsByDate(dates[0]);
-            }
-        }
+/* ---------------- shell ---------------- */
+function showView(v) {
+  document.querySelectorAll(".view").forEach(s => s.hidden = s.id !== "view-" + v);
+  document.querySelectorAll(".nav button").forEach(b => { if (b.dataset.view === v) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+  if (location.hash !== "#" + v) history.replaceState(null, "", "#" + v);
+  window.scrollTo(0, 0);
+}
 
-        function filterScheduleByDate(date) {
-            const list = document.getElementById('schedule-list');
-            const banner = document.getElementById('round-banner');
-            const roundText = document.getElementById('round-text');
-            const dateGames = allGames[date];
-            if (!dateGames || !list) return;
-            const sheetKeys = Object.keys(dateGames).sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0));
-            const first = dateGames[sheetKeys[0]];
-            if (roundText) roundText.innerText = `Round ${first.round} • Game ${first.gameNum}`;
-            if (banner) banner.classList.remove('hidden');
-            list.innerHTML = renderScheduleItems(dateGames, false, date);
-        }
+function fillPickers() {
+  const opts = `<option value="">Choose your name</option>` + allPlayers().map(n => `<option${n === me ? " selected" : ""}>${esc(n)}</option>`).join("");
+  document.querySelectorAll(".me-select").forEach(s => s.innerHTML = opts);
+  if (me && !allPlayers().includes(me)) { me = ""; store.set("gbuMe", ""); }
+}
+function setMe(name) {
+  me = name; store.set("gbuMe", name);
+  document.querySelectorAll(".me-select").forEach(s => s.value = name);
+  renderAll(true);
+}
 
-        function filterPlayoffsByDate(date) {
-            const list = document.getElementById('playoffs-list');
-            const banner = document.getElementById('playoff-round-banner');
-            const roundText = document.getElementById('playoff-round-text');
-            const dateGames = allPlayoffs[date];
-            if (!dateGames || !list) return;
-            let title = "Playoff Schedule";
-            if (date.includes("April 6")) title = "Playoffs Game 2";
-            else if (date.includes("March 30")) title = "Playoffs Game 1";
-            if (roundText) roundText.innerText = title;
-            if (banner) banner.classList.remove('hidden');
-            list.innerHTML = renderScheduleItems(dateGames, true, date);
-        }
+function renderAll(keepWeek) {
+  if (!keepWeek) currentWeek = WEEKS.length ? WEEKS[nextWeekIndex()].week : 1;
+  renderBanner(); renderHome(); renderChips(); renderWeek(); renderMine(); renderPlayoffs(); renderStandings(); renderPhotos();
+}
 
-        function renderScheduleItems(dateGames, isPlayoffs, date) {
-            const sheetKeys = Object.keys(dateGames).sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0));
-            
-            const specialRosters = {
-                "steve sharp": { vice: "JAMIE LAWRIE", second: "JON JENKINS", lead: "BILL DREWERY" },
-                "frank meany": { vice: "MARK JOEL", second: "JOHN LEFAIVE", lead: "JOE SAUNDERCOOK" }
-            };
+async function load(keepWeek) {
+  try {
+    DATA = await fetchJSON(`${API_URL}?action=data`);
+    WEEKS = buildWeeks(DATA.games || []);
+    fillPickers();
+    renderAll(keepWeek);
+    $("loading").hidden = true; $("load-error").hidden = true;
+    if (!document.querySelector(".view:not([hidden])")) showView(["home", "schedule", "standings", "photos", "info"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "home");
+  } catch (e) {
+    $("loading").hidden = true;
+    if (!DATA) $("load-error").hidden = false;
+  }
+}
 
-            return sheetKeys.map(sId => {
-                let game = JSON.parse(JSON.stringify(dateGames[sId]));
-                let sheetLabel = game.sheetDisplay;
-                
-                const isApril6 = date.includes("April 6") || date.includes("04/06");
-                if (isPlayoffs && isApril6) {
-                    if (sId === "1") { sheetLabel = "SHEET 1 - POOL C SEMIFINAL"; game.teams[0].skip = "Steve Chambers"; game.teams[1].skip = "Terry Taylor"; }
-                    else if (sId === "2") { sheetLabel = "SHEET 2 - POOL C SEMIFINAL"; game.teams[0].skip = "Jeff Sisson"; game.teams[1].skip = "Steve Sharp"; }
-                    else if (sId === "3") { sheetLabel = "SHEET 3 - POOL A FINAL"; game.teams[0].skip = "Bill Donovan"; game.teams[1].skip = "Bob Stuart"; }
-                    else if (sId === "4") { sheetLabel = "SHEET 4 - POOL B FINAL"; game.teams[0].skip = "Frank Meany"; game.teams[1].skip = "Dan Cloutier"; }
+document.querySelectorAll(".nav button").forEach(b => b.addEventListener("click", () => showView(b.dataset.view)));
+document.querySelectorAll("[data-mode]").forEach(b => b.addEventListener("click", () => setMode(b.dataset.mode)));
+document.querySelectorAll("[data-pos]").forEach(b => b.addEventListener("click", () => { standPos = b.dataset.pos; renderStandings(); }));
+document.querySelectorAll(".me-select").forEach(s => s.addEventListener("change", () => setMe(s.value)));
+$("chips").addEventListener("click", e => { const c = e.target.closest(".chip"); if (c) goWeek(+c.dataset.week); });
+$("prev-week").addEventListener("click", () => goWeek(currentWeek - 1));
+$("next-week").addEventListener("click", () => goWeek(currentWeek + 1));
+$("retry").addEventListener("click", () => { $("load-error").hidden = true; $("loading").hidden = false; load(); });
+$("photo-list").addEventListener("click", e => {
+  const b = e.target.closest("button[data-src]"); if (!b) return;
+  $("lightbox-img").src = b.dataset.src; $("lightbox-img").alt = b.dataset.cap; $("lightbox-cap").textContent = b.dataset.cap;
+  const d = $("lightbox"); d.showModal ? d.showModal() : d.setAttribute("open", "");
+});
+$("lightbox").addEventListener("click", e => { if (e.target.id !== "lightbox-img") $("lightbox").close(); });
+window.addEventListener("hashchange", () => { const v = location.hash.slice(1); if (["home", "schedule", "standings", "photos", "info"].includes(v)) showView(v); });
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && DATA) load(true); });
 
-                    game.teams.forEach(t => {
-                        if (!t.skip) return;
-                        const sKey = t.skip.toLowerCase();
-                        if (specialRosters[sKey]) {
-                            t.vice = specialRosters[sKey].vice;
-                            t.second = specialRosters[sKey].second;
-                            t.lead = specialRosters[sKey].lead;
-                        } 
-                        else if (masterRosters[sKey]) {
-                            t.vice = masterRosters[sKey].vice;
-                            t.second = masterRosters[sKey].second;
-                            t.lead = masterRosters[sKey].lead;
-                        }
-                    });
-                }
+/* ---------------- admin: weekly score entry ---------------- */
+let adminPin = "", adminWeek = null, adminDirty = false, logoTaps = 0, tapTimer;
+$("logo").addEventListener("click", () => {
+  logoTaps++; clearTimeout(tapTimer);
+  if (logoTaps >= 5) { logoTaps = 0; openAdmin(); } else tapTimer = setTimeout(() => logoTaps = 0, 2000);
+});
+$("admin-close").addEventListener("click", closeAdmin);
+$("admin-lock").addEventListener("click", () => { adminPin = ""; adminWeek = null; try { sessionStorage.removeItem("gbuPin"); } catch (e) {} adminShow(); });
+$("admin-login").addEventListener("submit", adminLogin);
+$("admin-week").addEventListener("change", e => adminLoadWeek(+e.target.value));
+$("admin-save-btn").addEventListener("click", adminSave);
 
-                return `
-                    <div class="glass-card rounded border border-[#d9c5a0] overflow-hidden">
-                        <div class="bg-[#f4eee1] px-2 py-1 border-b border-[#d9c5a0] text-center">
-                            <span class="text-[9px] font-black text-[#735338] uppercase tracking-widest">${sheetLabel}</span>
-                        </div>
-                        <div class="p-3 flex items-start justify-between gap-4">
-                            ${renderTeam(game.teams[0], false)}
-                            <div class="text-[8px] font-black text-[#d9c5a0] italic mt-2">VS</div>
-                            ${renderTeam(game.teams[1], true)}
-                        </div>
-                    </div>`;
-            }).join('');
-        }
+function openAdmin() { $("admin").hidden = false; document.body.style.overflow = "hidden"; adminShow(); }
+function closeAdmin() {
+  if (adminDirty && !confirm("You have unsaved scores. Close anyway?")) return;
+  adminDirty = false; $("admin").hidden = true; document.body.style.overflow = "";
+}
+async function adminPost(body) {
+  const r = await fetch(API_URL, { method: "POST", body: JSON.stringify({ ...body, pin: adminPin }) });
+  const j = await r.json(); if (!j.ok) throw new Error(j.error || "Something went wrong."); return j;
+}
+const adminGet = q => fetchJSON(`${API_URL}?${q}`, 2);
+function adminMsg(t, err) { const p = $("admin-msg"); p.textContent = t; p.className = err ? "err" : ""; }
+function adminShow() {
+  try { adminPin = sessionStorage.getItem("gbuPin") || adminPin; } catch (e) {}
+  $("admin-lock").hidden = !adminPin;
+  if (adminPin) return adminUnlocked();
+  $("admin-login").hidden = false; $("admin-entry").hidden = true;
+  setTimeout(() => $("admin-pin").focus(), 50);
+}
+async function adminLogin(e) {
+  e.preventDefault();
+  adminPin = $("admin-pin").value.trim(); $("admin-login-msg").textContent = "Checking…";
+  try {
+    await adminPost({ action: "verify" });
+    try { sessionStorage.setItem("gbuPin", adminPin); } catch (err) {}
+    $("admin-login-msg").textContent = ""; $("admin-pin").value = ""; $("admin-lock").hidden = false;
+    adminUnlocked();
+  } catch (err) { adminPin = ""; $("admin-login-msg").textContent = err.message; }
+}
+async function adminUnlocked() {
+  $("admin-login").hidden = true; $("admin-entry").hidden = false;
+  adminMsg("Loading weeks…");
+  try {
+    const { weeks } = await adminGet("action=weeks");
+    const mark = { done: "✓ ", partial: "◐ ", open: "" };
+    $("admin-week").innerHTML = weeks.map(w => `<option value="${w.week}">${mark[w.status]}Week ${w.week}: Round ${w.round} Game ${w.game}, ${esc(w.date)}</option>`).join("");
+    const pick = adminWeek ? adminWeek.week.week : (weeks.find(w => w.status !== "done") || weeks[weeks.length - 1] || {}).week;
+    if (pick) { $("admin-week").value = pick; await adminLoadWeek(pick, true); } else adminMsg("No games found on the schedule tab.", true);
+  } catch (err) { adminMsg(err.message, true); }
+}
+async function adminLoadWeek(week, force) {
+  if (adminDirty && !force && !confirm("You have unsaved scores. Switch weeks anyway?")) { $("admin-week").value = adminWeek.week.week; return; }
+  adminMsg("Loading…"); $("admin-games").innerHTML = "";
+  try {
+    adminWeek = await adminGet(`action=week&week=${week}`);
+    renderAdminGames(); adminDirty = false;
+    adminMsg(adminWeek.games.every(g => g.teams.every(t => t.result)) ? "Scores are saved for this week." : "Enter each team's score and ends won.");
+  } catch (err) { adminMsg(err.message, true); }
+}
+function renderAdminGames() {
+  $("admin-games").innerHTML = adminWeek.games.map((g, gi) => `<div class="agame">
+    <div class="agame-head"><span class="sh">Sheet ${esc(g.sheet)}</span><span>Score</span><span>Ends</span><span class="blank"></span></div>
+    ${g.teams.map((t, ti) => `<div class="arow"><div class="nm"><b>${esc(t.skip)}</b><small>${[t.vice, t.second, t.lead].filter(Boolean).map(esc).join(", ")}</small></div>
+      <input class="num" id="sc-${gi}-${ti}" inputmode="numeric" aria-label="${esc(t.skip)} score" value="${esc(t.score)}" data-g="${gi}">
+      <input class="num" id="en-${gi}-${ti}" inputmode="decimal" aria-label="${esc(t.skip)} ends won" value="${esc(t.ends)}" data-g="${gi}">
+      <span class="rbadge" id="rs-${gi}-${ti}">—</span></div>`).join("")}</div>`).join("");
+  $("admin-games").querySelectorAll(".num").forEach(i => i.addEventListener("input", () => { adminDirty = true; adminResult(+i.dataset.g); adminMsg("Unsaved changes."); }));
+  adminWeek.games.forEach((g, gi) => adminResult(gi));
+}
+const readNum = el => { const s = el.value.trim(); if (s === "") return { blank: true, ok: true }; const n = Number(s); return { blank: false, ok: isFinite(n) && n >= 0, n }; };
+function adminResult(gi) {
+  const v = [0, 1].map(ti => ({ sc: readNum($(`sc-${gi}-${ti}`)), en: readNum($(`en-${gi}-${ti}`)) }));
+  [0, 1].forEach(ti => { $(`sc-${gi}-${ti}`).classList.toggle("bad", !v[ti].sc.ok); $(`en-${gi}-${ti}`).classList.toggle("bad", !v[ti].en.ok); });
+  let res = ["", ""];
+  if (v.every(x => !x.sc.blank && x.sc.ok)) { const a = v[0].sc.n, b = v[1].sc.n; res = a > b ? ["Win", "Loss"] : a < b ? ["Loss", "Win"] : ["Tie", "Tie"]; }
+  [0, 1].forEach(ti => { const el = $(`rs-${gi}-${ti}`); el.className = "rbadge " + res[ti]; el.textContent = res[ti] ? res[ti].toUpperCase() : "—"; });
+}
+async function adminSave() {
+  if (!adminWeek) return;
+  const games = [];
+  for (let gi = 0; gi < adminWeek.games.length; gi++) {
+    const g = adminWeek.games[gi];
+    const teams = g.teams.map((t, ti) => ({ row: t.row, skip: t.skip, score: $(`sc-${gi}-${ti}`).value.trim(), ends: $(`en-${gi}-${ti}`).value.trim() }));
+    if ([0, 1].some(ti => !readNum($(`sc-${gi}-${ti}`)).ok || !readNum($(`en-${gi}-${ti}`)).ok)) return adminMsg(`Sheet ${g.sheet}: scores and ends must be numbers.`, true);
+    const scored = teams.filter(t => t.score !== "").length;
+    if (scored === 1 || (scored === 0 && teams.some(t => t.ends !== ""))) return adminMsg(`Sheet ${g.sheet}: enter a score for both skips, or leave both blank.`, true);
+    games.push({ sheet: g.sheet, teams });
+  }
+  const btn = $("admin-save-btn"); btn.disabled = true; adminMsg("Saving and updating standings…");
+  try {
+    const res = await adminPost({ action: "save", week: adminWeek.week.week, games });
+    adminWeek = { week: res.week, games: res.games }; renderAdminGames(); adminDirty = false;
+    adminMsg(`Saved week ${res.week.week}. Standings updated.`);
+    const opt = document.querySelector(`#admin-week option[value="${res.week.week}"]`);
+    if (opt) opt.textContent = opt.textContent.replace(/^[✓◐] /, "").replace(/^/, res.week.status === "done" ? "✓ " : res.week.status === "partial" ? "◐ " : "");
+    load(true);
+  } catch (err) {
+    adminMsg(err.message, true);
+    if (/PIN/i.test(err.message)) { adminPin = ""; try { sessionStorage.removeItem("gbuPin"); } catch (e) {} adminShow(); }
+  } finally { btn.disabled = false; }
+}
 
-        function renderTeam(team, isRight) {
-            if (!team || !team.skip) return `<div class="flex-1 text-[10px] opacity-40 italic">BYE</div>`;
-            const res = (team.result || "").toUpperCase();
-            const resColor = res === "W" ? "text-green-700" : (res === "L" ? "text-red-700" : "text-black");
-            return `
-                <div class="flex-1 min-w-0 ${isRight ? 'text-left' : 'text-right'}">
-                    <div class="font-black text-[#a63a2a] text-xs sm:text-sm uppercase leading-tight truncate mb-1.5">${team.skip}</div>
-                    <div class="space-y-0.5">
-                        <div class="text-[10px] sm:text-[11px] text-[#735338] font-bold uppercase opacity-90 leading-none">V: ${team.vice || ''}</div>
-                        <div class="text-[10px] sm:text-[11px] text-[#735338] font-bold uppercase opacity-90 leading-none">S: ${team.second || ''}</div>
-                        <div class="text-[10px] sm:text-[11px] text-[#735338] font-bold uppercase opacity-90 leading-none">L: ${team.lead || ''}</div>
-                    </div>
-                    ${team.result ? `
-                        <div class="mt-3 flex flex-col ${isRight ? 'items-start' : 'items-end'}">
-                            <span class="text-[10px] font-black ${resColor} uppercase tracking-tight">${res === "W" ? "WIN" : (res === "L" ? "LOSS" : res)}</span>
-                            <div class="flex items-baseline gap-1.5">
-                                <span class="text-sm sm:text-lg font-black text-[#2d3e50]">${team.score}</span>
-                                <span class="text-[9px] sm:text-xs font-bold text-[#735338] italic">(${team.endsWon})</span>
-                            </div>
-                        </div>` : ''}
-                </div>`;
-        }
-
-        function filterStandings(pos) {
-            document.querySelectorAll('.pos-tab').forEach(b => {
-                b.classList.remove('bg-[#2d3e50]', 'text-white');
-                b.classList.add('bg-white', 'text-[#735338]');
-            });
-            const activeBtn = document.getElementById(`btn-${pos}`);
-            if (activeBtn) {
-                activeBtn.classList.replace('bg-white', 'bg-[#2d3e50]');
-                activeBtn.classList.replace('text-[#735338]', 'text-white');
-            }
-            const list = document.getElementById('standings-list');
-            const players = (allStandings[pos] || []).sort((a,b) => b.pts !== a.pts ? b.pts - a.pts : b.ends - a.ends);
-            list.innerHTML = players.map((p, idx) => {
-                const ribbon = idx < 4 ? 'A' : (idx < 8 ? 'B' : '');
-                return `
-                    <div class="bg-white rounded border border-[#d9c5a0] p-4 flex items-center justify-between relative overflow-hidden shadow-sm">
-                        ${ribbon ? `<div class="ribbon-container"><div class="ribbon-shape ${ribbon === 'A' ? 'ribbon-a' : 'ribbon-b'}"><span class="ribbon-text">${ribbon}</span></div></div>` : ''}
-                        <div class="flex items-center gap-4">
-                            <span class="w-7 h-7 flex items-center justify-center bg-[#f4eee1] rounded text-[11px] font-black text-[#a63a2a]">${idx + 1}</span>
-                            <span class="font-black text-[#2d3e50] uppercase text-[13px] tracking-wide">${p.name}</span>
-                        </div>
-                        <div class="flex items-baseline gap-6 pr-4">
-                            <div class="flex flex-col items-end">
-                                <span class="text-[7px] font-bold opacity-40 uppercase tracking-widest leading-none mb-1">Ends</span>
-                                <span class="text-[10px] font-black text-[#735338]">${p.ends}</span>
-                            </div>
-                            <div class="flex flex-col items-end">
-                                <span class="text-[7px] font-bold opacity-40 uppercase leading-none">Pts</span>
-                                <span class="text-base font-black text-[#a63a2a]">${p.pts}</span>
-                            </div>
-                        </div>
-                    </div>`;
-            }).join('');
-        }
-
-        function switchTab(tab) {
-            ['schedule', 'standings', 'info', 'playoffs'].forEach(t => {
-                const view = document.getElementById(`${t}-view`);
-                const tabBtn = document.getElementById(`tab-${t}`);
-                if (view) view.classList.add('hidden');
-                if (tabBtn) tabBtn.classList.remove('active-tab');
-            });
-            const activeView = document.getElementById(`${tab}-view`);
-            const activeTabBtn = document.getElementById(`tab-${tab}`);
-            if (activeView) activeView.classList.remove('hidden');
-            if (activeTabBtn) activeTabBtn.classList.add('active-tab');
-            
-            if (tab === 'standings') filterStandings('Skip');
-            window.scrollTo(0,0);
-        }
-
-        window.onload = loadAppData;
-    </script>
+load();
+</script>
 </body>
 </html>
