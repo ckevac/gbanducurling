@@ -6,8 +6,8 @@
 <title>The Good, the Bad &amp; the Ugly Curling League</title>
 <meta name="description" content="Schedule, standings, photos and league info for The Good, the Bad &amp; the Ugly Curling League — Mondays at the Whitby Curling Club.">
 <meta name="theme-color" content="#2d3e50">
-<link rel="icon" href="https://lh3.googleusercontent.com/d/10gkXR4l-Mifhhz2hevWdFM8TZiqoIe52">
-<link rel="apple-touch-icon" href="https://lh3.googleusercontent.com/d/10gkXR4l-Mifhhz2hevWdFM8TZiqoIe52">
+<link rel="icon" href="assets/logo.png">
+<link rel="apple-touch-icon" href="assets/logo.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GBU Curling">
@@ -256,6 +256,15 @@ footer { max-width: 960px; margin: 8px auto 0; padding: 0 16px 16px; text-align:
 .admin-save p { flex: 1; margin: 0; font-size: 14px; color: rgba(255,255,255,.75); }
 .admin-save p.err { color: #f7b4a8; }
 .pin { width: 100%; text-align: center; font: 700 28px/1 var(--cond); letter-spacing: .4em; padding: 10px; border-radius: 8px; border: 2px solid var(--tan); }
+.aprint { background: var(--navy-dark); border: 1px solid rgba(255,255,255,.12); border-radius: 10px; padding: 12px; margin-bottom: 20px; }
+.aprint h3, .enter-h { margin: 0 0 10px; font: 700 17px/1.2 var(--cond); color: var(--tan); }
+.aprint-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+.pbtn { min-height: 56px; border-radius: 8px; border: 1px solid var(--tan); background: var(--paper); color: var(--navy); font: 700 15px/1.15 var(--cond); cursor: pointer; padding: 6px; }
+.pbtn small { display: block; font: 500 12px/1.2 var(--cond); color: var(--muted); margin-top: 3px; }
+.pbtn:disabled { opacity: .5; cursor: wait; }
+.aprint-all { margin: 10px 0 0; font-size: 14px; color: rgba(255,255,255,.7); }
+.linkbtn { background: none; border: 0; padding: 0; color: var(--tan); text-decoration: underline; cursor: pointer; font: inherit; }
+.aprint-msg { margin: 8px 0 0; font-size: 13px; color: rgba(255,255,255,.75); min-height: 1em; }
 .admin-help { font-size: 13px; color: rgba(255,255,255,.55); margin-top: 16px; }
 </style>
 </head>
@@ -266,7 +275,7 @@ footer { max-width: 960px; margin: 8px auto 0; padding: 0 16px 16px; text-align:
 <header class="masthead">
   <div class="masthead-inner">
     <button class="logo" id="logo" type="button" aria-label="League logo">
-      <img src="https://lh3.googleusercontent.com/d/10gkXR4l-Mifhhz2hevWdFM8TZiqoIe52" alt="" onerror="this.style.visibility='hidden'">
+      <img src="assets/logo.png" alt="" onerror="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/10gkXR4l-Mifhhz2hevWdFM8TZiqoIe52'">
     </button>
     <div>
       <h1>The Good, the Bad &amp; the Ugly Curling League</h1>
@@ -408,7 +417,7 @@ footer { max-width: 960px; margin: 8px auto 0; padding: 0 16px 16px; text-align:
 <div id="admin" hidden>
   <div class="admin-sheet" role="dialog" aria-modal="true" aria-labelledby="admin-h">
     <div class="admin-top">
-      <h2 id="admin-h">Enter scores</h2>
+      <h2 id="admin-h">League admin</h2>
       <div>
         <button type="button" id="admin-lock" hidden>Lock</button>
         <button type="button" id="admin-close" aria-label="Close">✕</button>
@@ -422,6 +431,23 @@ footer { max-width: 960px; margin: 8px auto 0; padding: 0 16px 16px; text-align:
         <p id="admin-login-msg" style="color:#f7b4a8;min-height:1.2em;font-size:14px"></p>
       </form>
       <div id="admin-entry" hidden>
+        <section class="aprint" aria-labelledby="print-h">
+          <h3 id="print-h">Print sheets</h3>
+          <label for="print-week" class="sr-only">Week to print</label>
+          <select id="print-week"></select>
+          <div class="aprint-btns">
+            <button type="button" class="pbtn" data-print="score">Score sheet<small>8.5 × 11</small></button>
+            <button type="button" class="pbtn" data-print="week">Weekly schedule<small>11 × 17</small></button>
+            <button type="button" class="pbtn" data-print="round"><span id="print-round-label">Round teams &amp; schedule</span><small>11 × 17</small></button>
+          </div>
+          <p class="aprint-all">Whole season:
+            <button type="button" class="linkbtn" data-print-all="score">all 20 score sheets</button>,
+            <button type="button" class="linkbtn" data-print-all="week">all 20 weekly schedules</button>,
+            <button type="button" class="linkbtn" data-print-all="round">all 5 round sheets</button>
+          </p>
+          <p id="print-msg" class="aprint-msg" aria-live="polite"></p>
+        </section>
+        <h3 class="enter-h">Enter scores</h3>
         <label for="admin-week" class="sr-only">Week</label>
         <select id="admin-week"></select>
         <div id="admin-games"></div>
@@ -730,6 +756,39 @@ $("lightbox").addEventListener("click", e => { if (e.target.id !== "lightbox-img
 window.addEventListener("hashchange", () => { const v = location.hash.slice(1); if (["home", "schedule", "standings", "photos", "info"].includes(v)) showView(v); });
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && DATA) load(true); });
 
+/* ---------------- admin: printable PDFs ---------------- */
+let printLibs = null;
+function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = () => rej(new Error("Couldn't load " + src)); document.head.appendChild(s); }); }
+function ensurePrintLibs() {
+  if (!printLibs) printLibs = (async () => {
+    if (!window.jspdf) await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+    if (!window.GBUPrint) await loadScript("assets/printables.js");
+  })().catch(e => { printLibs = null; throw e; });
+  return printLibs;
+}
+function fillPrintWeeks() {
+  const sel = $("print-week"); if (!WEEKS.length) { sel.innerHTML = ""; return; }
+  const keep = +sel.value || WEEKS[nextWeekIndex()].week;
+  sel.innerHTML = WEEKS.map(w => `<option value="${w.week}">Week ${w.week}: ${fmtLong(w.date)}</option>`).join("");
+  sel.value = keep; updateRoundLabel();
+}
+function updateRoundLabel() { const w = WEEKS.find(x => x.week === +$("print-week").value); $("print-round-label").textContent = w ? `Round ${w.round} teams & schedule` : "Round teams & schedule"; }
+$("print-week").addEventListener("change", updateRoundLabel);
+async function makePdf(kind, all) {
+  const btns = document.querySelectorAll(".pbtn, .linkbtn"); btns.forEach(b => b.disabled = true);
+  $("print-msg").textContent = "Making the PDF…";
+  try {
+    await ensurePrintLibs();
+    const w = WEEKS.find(x => x.week === +$("print-week").value);
+    const which = all ? "all" : kind === "round" ? w.round : w.week;
+    const name = await window.GBUPrint.download(kind, WEEKS, which);
+    $("print-msg").textContent = `Downloaded ${name}.`;
+  } catch (e) { $("print-msg").textContent = "The PDF couldn't be made: " + e.message; }
+  finally { btns.forEach(b => b.disabled = false); }
+}
+document.querySelectorAll("[data-print]").forEach(b => b.addEventListener("click", () => makePdf(b.dataset.print, false)));
+document.querySelectorAll("[data-print-all]").forEach(b => b.addEventListener("click", () => makePdf(b.dataset.printAll, true)));
+
 /* ---------------- admin: weekly score entry ---------------- */
 let adminPin = "", adminWeek = null, adminDirty = false, logoTaps = 0, tapTimer;
 $("logo").addEventListener("click", () => {
@@ -772,6 +831,7 @@ async function adminLogin(e) {
 }
 async function adminUnlocked() {
   $("admin-login").hidden = true; $("admin-entry").hidden = false;
+  fillPrintWeeks();
   adminMsg("Loading weeks…");
   try {
     const { weeks } = await adminGet("action=weeks");
