@@ -201,6 +201,9 @@ select {
 .photo { margin: 0; background: var(--card); border: 1px solid var(--tan); border-radius: 8px; padding: 6px; }
 .photo button { display: block; width: 100%; border: 0; padding: 0; background: var(--paper-deep); cursor: zoom-in; aspect-ratio: 4 / 3; border-radius: 4px; overflow: hidden; }
 .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo.missing button { cursor: default; display: flex; align-items: center; justify-content: center; }
+.photo.missing img { display: none; }
+.photo.missing button::after { content: "Photo coming soon"; font: 600 14px/1.2 var(--cond); color: var(--muted); }
 .photo figcaption { font: 600 15px/1.25 var(--cond); color: var(--navy); padding: 6px 2px 2px; }
 dialog.lightbox { border: 0; padding: 0; background: transparent; max-width: 96vw; max-height: 92vh; }
 dialog.lightbox::backdrop { background: rgba(20,28,36,.88); }
@@ -609,7 +612,10 @@ function renderMine() {
 }
 
 function playoffRows() {
-  const rows = (DATA.playoffs || []).slice(1).filter(r => r && r[4] && !String(r[4]).startsWith("#"));
+  // Only this season's playoff games: dated on or after the first regular-season game.
+  const start = WEEKS.find(w => w.date)?.date;
+  const inSeason = d => { const t = new Date(d); return start && !isNaN(t) && t >= start; };
+  const rows = (DATA.playoffs || []).slice(1).filter(r => r && r[4] && !String(r[4]).startsWith("#") && inSeason(r[0]));
   const byDate = new Map();
   rows.forEach(r => {
     const key = r[0];
@@ -659,7 +665,7 @@ function renderPhotos() {
   photos.forEach(p => { if (!seasons.has(p.season)) seasons.set(p.season, []); seasons.get(p.season).push(p); });
   const order = [...seasons.keys()].sort((a, b) => b.localeCompare(a));
   $("photo-list").innerHTML = order.map(s => `<section class="season"><h3>${esc(s)}</h3><div class="photos">${seasons.get(s).map(p =>
-    `<figure class="photo"><button type="button" data-src="${esc(p.url)}" data-cap="${esc(s + " " + p.caption)}"><img src="${esc(p.url)}" alt="${esc(p.caption)}, ${esc(s)}" loading="lazy" referrerpolicy="no-referrer"></button><figcaption>${esc(p.caption)}</figcaption></figure>`).join("")}</div></section>`).join("");
+    `<figure class="photo"><button type="button" data-src="${esc(p.url)}" data-cap="${esc(s + " " + p.caption)}"><img src="${esc(p.url)}" alt="${esc(p.caption)}, ${esc(s)}" loading="lazy" onerror="this.closest('.photo').classList.add('missing')"></button><figcaption>${esc(p.caption)}</figcaption></figure>`).join("")}</div></section>`).join("");
 }
 
 /* ---------------- banner ---------------- */
@@ -716,7 +722,7 @@ $("prev-week").addEventListener("click", () => goWeek(currentWeek - 1));
 $("next-week").addEventListener("click", () => goWeek(currentWeek + 1));
 $("retry").addEventListener("click", () => { $("load-error").hidden = true; $("loading").hidden = false; load(); });
 $("photo-list").addEventListener("click", e => {
-  const b = e.target.closest("button[data-src]"); if (!b) return;
+  const b = e.target.closest("button[data-src]"); if (!b || b.closest(".missing")) return;
   $("lightbox-img").src = b.dataset.src; $("lightbox-img").alt = b.dataset.cap; $("lightbox-cap").textContent = b.dataset.cap;
   const d = $("lightbox"); d.showModal ? d.showModal() : d.setAttribute("open", "");
 });
