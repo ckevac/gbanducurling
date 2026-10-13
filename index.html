@@ -293,7 +293,7 @@ footer { max-width: 960px; margin: 8px auto 0; padding: 0 16px 16px; text-align:
 </nav>
 
 <main>
-  <div id="loading" class="state"><div class="spinner"></div>Loading the schedule…</div>
+  <div id="loading" class="state"><div class="spinner"></div><span id="loading-text">Polishing the stones…</span></div>
   <div id="load-error" class="state" hidden>
     <p>The schedule didn't load. Check your connection and try again.</p>
     <button class="btn" type="button" id="retry">Try again</button>
@@ -468,6 +468,8 @@ const POSITIONS = ["Skip", "Vice", "Second", "Lead"];
 const PLURAL = { Skip: "Skips", Vice: "Vices", Second: "Seconds", Lead: "Leads" };
 
 const $ = id => document.getElementById(id);
+const LOADING_LINES = ["Polishing the stones…", "Cleaning the brooms…", "Pebbling the ice…", "Checking for lint on the ice…"];
+(function pickLoadingLine() { const el = $("loading-text"); if (el) el.textContent = LOADING_LINES[Math.floor(Math.random() * LOADING_LINES.length)]; })();
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const store = {
   get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
@@ -511,7 +513,8 @@ function buildWeeks(games) {
   return [...map.values()].sort((a, b) => a.week - b.week).map(w => {
     const gs = [...w.sheets.entries()].sort((a, b) => (parseInt(a[0]) || 0) - (parseInt(b[0]) || 0)).map(([sheet, teams]) => ({ sheet, teams }));
     const all = gs.flatMap(g => g.teams);
-    return { week: w.week, iso: w.iso, date: w.date, round: w.round, game: w.game, games: gs, done: all.length > 0 && all.every(t => t.result) };
+    const hidden = all.length > 0 && all.every(t => t.hidden);
+    return { week: w.week, iso: w.iso, date: w.date, round: w.round, game: w.game, games: gs, hidden, done: !hidden && all.length > 0 && all.every(t => t.result) };
   });
 }
 
@@ -546,6 +549,10 @@ function gameHtml(g, label) {
   return `<article class="game"><div class="game-head"><span>${esc(label || "Sheet " + g.sheet)}</span></div>${g.teams.map(teamHtml).join("")}</article>`;
 }
 
+function hiddenHtml(w) {
+  return `<div class="empty"><strong style="font:400 20px/1.2 var(--display);color:var(--navy);display:block;margin-bottom:6px">Round ${w.round} teams are coming</strong>New teams and matchups are posted once all of Round ${w.round - 1}'s scores are in.</div>`;
+}
+
 /* ---------------- home ---------------- */
 function renderHome() {
   const box = $("next-poster");
@@ -565,7 +572,7 @@ function renderHome() {
       <div class="sub">${allDone ? "Final standings are on the Standings page." : `Round ${w.round}, Game ${w.game} &nbsp;|&nbsp; Week ${w.week} of ${WEEKS.length}`}</div>
       ${count && !allDone ? `<div class="count">${count}</div>` : ""}
     </div>`;
-  $("next-games").innerHTML = allDone ? "" : `<h2 class="section-title">This week's games</h2><div class="games">${w.games.map(g => gameHtml(g)).join("")}</div>`;
+  $("next-games").innerHTML = allDone ? "" : `<h2 class="section-title">This week's games</h2>` + (w.hidden ? hiddenHtml(w) : `<div class="games">${w.games.map(g => gameHtml(g)).join("")}</div>`);
   renderMyNext();
   renderLeaders();
 }
@@ -573,6 +580,7 @@ function renderHome() {
 function myGames() {
   if (!me) return [];
   return WEEKS.map(w => {
+    if (w.hidden) return { w, g: null, hidden: true };
     for (const g of w.games) {
       const i = g.teams.findIndex(t => POSITIONS.some(p => t[p.toLowerCase()] === me));
       if (i !== -1) return { w, g, mine: g.teams[i], them: g.teams[1 - i] };
@@ -587,6 +595,7 @@ function renderMyNext() {
   const list = myGames();
   const idx = nextWeekIndex();
   const n = list[idx];
+  if (n && n.hidden) { box.innerHTML = `<p style="margin:0">Your Round ${n.w.round} team will be posted once Round ${n.w.round - 1} is finished.</p>`; return; }
   if (!n || !n.g) { box.innerHTML = `<p style="margin:0">You're not on the schedule for week ${WEEKS[idx]?.week}.</p>`; return; }
   const pos = POSITIONS.find(p => n.mine[p.toLowerCase()] === me);
   const mates = POSITIONS.filter(p => p !== pos).map(p => `${p} ${esc(n.mine[p.toLowerCase()])}`).join(", ");
@@ -615,7 +624,7 @@ function renderWeek() {
   $("week-sub").textContent = `Week ${w.week} of ${WEEKS.length}, Round ${w.round} Game ${w.game}`;
   $("prev-week").disabled = w.week === WEEKS[0].week;
   $("next-week").disabled = w.week === WEEKS[WEEKS.length - 1].week;
-  $("week-games").innerHTML = w.games.map(g => gameHtml(g)).join("");
+  $("week-games").innerHTML = w.hidden ? hiddenHtml(w) : w.games.map(g => gameHtml(g)).join("");
   document.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-current", +c.dataset.week === currentWeek));
   const cur = document.querySelector(`.chip[data-week="${currentWeek}"]`);
   if (cur && cur.scrollIntoView) cur.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
@@ -626,9 +635,10 @@ function renderMine() {
   const box = $("my-games");
   if (!me) { box.innerHTML = `<div class="empty">Pick your name above to see all of your games.</div>`; return; }
   const next = WEEKS[nextWeekIndex()]?.week;
-  box.innerHTML = `<ul class="mylist">${myGames().map(({ w, g, mine, them }) => {
+  box.innerHTML = `<ul class="mylist">${myGames().map(({ w, g, mine, them, hidden }) => {
     const d = w.date;
     const dateCell = `<div class="mydate">${d ? d.toLocaleDateString("en-CA", { month: "short" }) : "TBD"}<span>${d ? d.getDate() : ""}</span></div>`;
+    if (hidden) return `<li class="myrow">${dateCell}<div class="myteam"><div class="vs">Round ${w.round}</div>Team posted after Round ${w.round - 1}</div><div></div></li>`;
     if (!g) return `<li class="myrow">${dateCell}<div class="myteam">Not scheduled</div><div></div></li>`;
     const pos = POSITIONS.find(p => mine[p.toLowerCase()] === me);
     const mates = POSITIONS.filter(p => p !== pos).map(p => esc(mine[p.toLowerCase()])).join(", ");
@@ -766,22 +776,29 @@ function ensurePrintLibs() {
   })().catch(e => { printLibs = null; throw e; });
   return printLibs;
 }
+let ADMIN_WEEKS = null;   // full schedule incl. rounds not yet shown to players
+async function loadAdminWeeks() {
+  try { const d = await adminPost({ action: "data" }); ADMIN_WEEKS = buildWeeks(d.games || []); }
+  catch (e) { ADMIN_WEEKS = null; }
+  fillPrintWeeks();
+}
+const printWeeks = () => ADMIN_WEEKS || WEEKS;
 function fillPrintWeeks() {
-  const sel = $("print-week"); if (!WEEKS.length) { sel.innerHTML = ""; return; }
-  const keep = +sel.value || WEEKS[nextWeekIndex()].week;
-  sel.innerHTML = WEEKS.map(w => `<option value="${w.week}">Week ${w.week}: ${fmtLong(w.date)}</option>`).join("");
+  const W = printWeeks(), sel = $("print-week"); if (!W.length) { sel.innerHTML = ""; return; }
+  const keep = +sel.value || (WEEKS.length ? WEEKS[nextWeekIndex()].week : W[0].week);
+  sel.innerHTML = W.map(w => `<option value="${w.week}">Week ${w.week}: ${fmtLong(w.date)}</option>`).join("");
   sel.value = keep; updateRoundLabel();
 }
-function updateRoundLabel() { const w = WEEKS.find(x => x.week === +$("print-week").value); $("print-round-label").textContent = w ? `Round ${w.round} teams & schedule` : "Round teams & schedule"; }
+function updateRoundLabel() { const w = printWeeks().find(x => x.week === +$("print-week").value); $("print-round-label").textContent = w ? `Round ${w.round} teams & schedule` : "Round teams & schedule"; }
 $("print-week").addEventListener("change", updateRoundLabel);
 async function makePdf(kind, all) {
   const btns = document.querySelectorAll(".pbtn, .linkbtn"); btns.forEach(b => b.disabled = true);
   $("print-msg").textContent = "Making the PDF…";
   try {
     await ensurePrintLibs();
-    const w = WEEKS.find(x => x.week === +$("print-week").value);
+    const W = printWeeks(), w = W.find(x => x.week === +$("print-week").value);
     const which = all ? "all" : kind === "round" ? w.round : w.week;
-    const name = await window.GBUPrint.download(kind, WEEKS, which);
+    const name = await window.GBUPrint.download(kind, W, which);
     $("print-msg").textContent = `Downloaded ${name}.`;
   } catch (e) { $("print-msg").textContent = "The PDF couldn't be made: " + e.message; }
   finally { btns.forEach(b => b.disabled = false); }
@@ -810,7 +827,6 @@ async function adminPost(body) {
   const r = await fetch(API_URL, { method: "POST", body: JSON.stringify({ ...body, pin: adminPin }) });
   const j = await r.json(); if (!j.ok) throw new Error(j.error || "Something went wrong."); return j;
 }
-const adminGet = q => fetchJSON(`${API_URL}?${q}`, 2);
 function adminMsg(t, err) { const p = $("admin-msg"); p.textContent = t; p.className = err ? "err" : ""; }
 function adminShow() {
   try { adminPin = sessionStorage.getItem("gbuPin") || adminPin; } catch (e) {}
@@ -831,10 +847,10 @@ async function adminLogin(e) {
 }
 async function adminUnlocked() {
   $("admin-login").hidden = true; $("admin-entry").hidden = false;
-  fillPrintWeeks();
+  fillPrintWeeks(); loadAdminWeeks();
   adminMsg("Loading weeks…");
   try {
-    const { weeks } = await adminGet("action=weeks");
+    const { weeks } = await adminPost({ action: "weeks" });
     const mark = { done: "✓ ", partial: "◐ ", open: "" };
     $("admin-week").innerHTML = weeks.map(w => `<option value="${w.week}">${mark[w.status]}Week ${w.week}: Round ${w.round} Game ${w.game}, ${esc(w.date)}</option>`).join("");
     const pick = adminWeek ? adminWeek.week.week : (weeks.find(w => w.status !== "done") || weeks[weeks.length - 1] || {}).week;
@@ -845,7 +861,7 @@ async function adminLoadWeek(week, force) {
   if (adminDirty && !force && !confirm("You have unsaved scores. Switch weeks anyway?")) { $("admin-week").value = adminWeek.week.week; return; }
   adminMsg("Loading…"); $("admin-games").innerHTML = "";
   try {
-    adminWeek = await adminGet(`action=week&week=${week}`);
+    adminWeek = await adminPost({ action: "week", week });
     renderAdminGames(); adminDirty = false;
     adminMsg(adminWeek.games.every(g => g.teams.every(t => t.result)) ? "Scores are saved for this week." : "Enter each team's score and ends won.");
   } catch (err) { adminMsg(err.message, true); }
